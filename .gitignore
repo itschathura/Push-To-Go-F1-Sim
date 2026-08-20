@@ -1,0 +1,17 @@
+#Data & models folders (~5GB)
+data/
+.venv/
+src/ml_model/saved_model.pkl
+__pycache__/
+*.pyc
+venv/
+.env
+*.log
+
+
+# Large F1 datasets
+data/raw/
+data/processed/
+data/cache/
+
+ 

@@ -1,0 +1,6 @@
+scikit-learn
+xgboost
+scylla-driver
+streamlit
+python-dotenv
+livef1
