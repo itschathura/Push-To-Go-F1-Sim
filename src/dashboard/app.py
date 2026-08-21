@@ -58,7 +58,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-REFRESH_SECONDS = 0.1
+REFRESH_SECONDS = 0.5
 HISTORY_LIMIT = 30
 GAUGE_HEIGHT = 250
 SPARK_HEIGHT = 150
