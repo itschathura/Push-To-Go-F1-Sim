@@ -15,10 +15,10 @@ from src.ml_model import predict
 # ============================================================
 DRIVER_MAP = {
     '12': 'ANT', '44': 'HAM', '63': 'RUS', '16': 'LEC', '1': 'NOR',
-    '3': 'VER', '81': 'PIA', '6': 'HAD', '30': 'LAW', '10': 'GAS',
+    '3': 'VER', '81': 'PIA', '30': 'LAW', '10': 'GAS',
     '22': 'TSU', '43': 'COL', '87': 'BEA', '5': 'BOR', '55': 'SAI',
     '23': 'ALB', '31': 'OCO', '27': 'HUL', '14': 'ALO', '18': 'STR',
-    '77': 'BOT', '11': 'PER'
+    '77': 'BOT', '11': 'PER', '41': 'LIN'
 }
 
 # ⚠️ Sprint Race සඳහා update කරලා තියෙනවා - verify කරන්න run කරන්න කලින්
@@ -57,6 +57,26 @@ def parse_gap_seconds(value):
         return None
 
 
+def safe_float(val, default=0.0):
+    """Safely convert a value to float, returning default if None or invalid."""
+    if val is None:
+        return default
+    try:
+        return float(val)
+    except (ValueError, TypeError):
+        return default
+
+
+def safe_int(val, default=0):
+    """Safely convert a value to int, returning default if None or invalid."""
+    if val is None:
+        return default
+    try:
+        return int(val)
+    except (ValueError, TypeError):
+        return default
+
+
 cluster = Cluster(
     ['127.0.0.1'],
     port=9042,
@@ -79,26 +99,33 @@ def process_driver(driver_no):
 
     driver_code = DRIVER_MAP.get(driver_no, f"UNK_{driver_no}")
 
+    # Safe float conversion before passing to soc_calculator
+    throttle = safe_float(state["throttle"])
+    brake = safe_float(state["brake"])
+    speed = safe_float(state["speed"])
+    rpm = safe_int(state["rpm"])
+    gap = safe_float(state["gap_seconds"])
+
     state["soc"] = soc_calculator.calculate_estimated_soc(
-        state["throttle"], state["brake"], 0.0, state["soc"], delta_time=0.27
+        throttle, brake, 0.0, state["soc"], delta_time=0.27
     )
     state["soc"] = max(0.0, min(100.0, state["soc"]))
 
     raw_data = {
-        "Speed": state["speed"],
-        "Throttle": state["throttle"],
-        "Brake": state["brake"]
+        "Speed": speed,
+        "Throttle": throttle,
+        "Brake": brake
     }
     prediction = predict.predict_single(raw_data)
 
     db_session.execute(INSERT_QUERY, (
         driver_code,
-        state["speed"], state["throttle"], state["brake"], state["rpm"],
-        prediction, state["soc"], state["gap_seconds"], SESSION_ID
+        speed, throttle, brake, rpm,
+        prediction, state["soc"], gap, SESSION_ID
     ))
 
-    print(f"{driver_code:>4} | Speed:{state['speed']:>6.1f} | "
-          f"Gap:{state['gap_seconds']:>6.3f}s | SOC:{state['soc']:>5.1f}% | "
+    print(f"{driver_code:>4} | Speed:{speed:>6.1f} | "
+          f"Gap:{gap:>6.3f}s | SOC:{state['soc']:>5.1f}% | "
           f"Pred:{prediction}")
 
 
@@ -110,32 +137,49 @@ client = RealF1Client(
 
 @client.callback("main_handler")
 async def handle_data(records):
-    for record in records:
-        driver_no = record.get("DriverNo")
-        if driver_no is None:
-            continue
+    # ─────────────────────────────────────────────────────────
+    # livef1 delivers data as a dict: {topic_name: [records]}
+    # e.g. {"CarData.z": [{DriverNo: "1", Speed: 315, ...}, ...]}
+    # We must iterate .items() to get the actual record dicts.
+    # ─────────────────────────────────────────────────────────
+    for topic_name, record_list in records.items():
+        for record in record_list:
+            try:
+                driver_no = record.get("DriverNo")
+                if driver_no is None:
+                    continue
 
-        state = get_state(driver_no)
+                state = get_state(driver_no)
 
-        if "RPM" in record:
-            if not is_valid_car_data(record):
-                continue
-            state["speed"] = record.get("Speed")
-            state["throttle"] = record.get("Throttle")
-            state["brake"] = record.get("Brake")
-            state["rpm"] = record.get("RPM")
+                # CarData.z records have RPM, Speed, Throttle, Brake
+                if "RPM" in record:
+                    if not is_valid_car_data(record):
+                        continue
+                    state["speed"] = record.get("Speed")
+                    state["throttle"] = record.get("Throttle")
+                    state["brake"] = record.get("Brake")
+                    state["rpm"] = record.get("RPM")
 
-        elif "IntervalToPositionAhead_Value" in record:
-            gap = parse_gap_seconds(record.get("IntervalToPositionAhead_Value"))
-            if gap is not None:
-                state["gap_seconds"] = gap
+                # TimingData records have IntervalToPositionAhead_Value
+                elif "IntervalToPositionAhead_Value" in record:
+                    gap = parse_gap_seconds(record.get("IntervalToPositionAhead_Value"))
+                    if gap is not None:
+                        state["gap_seconds"] = gap
 
-        process_driver(driver_no)
+                process_driver(driver_no)
+
+            except Exception as e:
+                print(f"[WARN] Error processing record (topic={topic_name}): {e}")
 
 
 if __name__ == "__main__":
-    print("Starting Live Client...")
-    print(f"Session ID: {SESSION_ID}")
+    print("=" * 60)
+    print("  Push to Go - Live F1 Client")
+    print("=" * 60)
+    print(f"  Session ID : {SESSION_ID}")
+    print(f"  Topics     : CarData.z, Position.z, TimingData")
+    print(f"  Drivers    : {len(DRIVER_MAP)} mapped")
+    print("=" * 60)
     try:
         client.run()
     except KeyboardInterrupt:

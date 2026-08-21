@@ -28,12 +28,11 @@ def setup_database():
             brake float,
             rpm int,
             drs int,
-            acceleration float,
             estimated_soc float,
             gap_to_ahead float,
-            tyrelife float,
-            compound_encoded int,
+            distance_to_ahead float,
             overtake_prediction int,
+            session_id text,
             PRIMARY KEY (driver, timestamp)
         ) WITH CLUSTERING ORDER BY (timestamp DESC)
     """)
