@@ -1,9 +1,13 @@
-from curl_cffi import requests as curl_requests
+from livef1.adapters import RealF1Client
 
-r = curl_requests.get(
-    "https://livetiming.formula1.com/signalr/negotiate",
-    params={"clientProtocol": "1.5", "connectionData": '[{"name":"Streaming"}]'},
-    impersonate="chrome124"
+client = RealF1Client(
+    topics=["CarData.z", "Position.z"],
+    log_file_name="race_data.json"
 )
-print(r.status_code)
-print(r.text[:500])
+
+@client.callback("telemetry_handler")
+async def handle_data(records):
+    for record in records:
+        print(record)
+
+client.run()

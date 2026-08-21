@@ -1,29 +1,18 @@
 import sys, os
-
-from curl_cffi import requests as curl_requests
-import requests
-
-# --- Cloudflare TLS Bypass කිරීම (Chrome අනුකරණය) ---
-class ChromeSession(curl_requests.Session):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.impersonate = "chrome"
-
-requests.Session = ChromeSession
-requests.get = curl_requests.get
-requests.post = curl_requests.post
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from livef1.adapters import RealF1Client
 from cassandra.cluster import Cluster
 from cassandra.io.asyncioreactor import AsyncioConnection
-from cassandra.policies import AddressTranslator   # ← ADD THIS
+from cassandra.policies import AddressTranslator
 
 from src.common import soc_calculator, gap_calculator, feature_engineering
 from src.ml_model import predict
 
 
-
+# ============================================================
+# 2026 Season Driver Number -> Driver Code Mapping
+# ============================================================
 DRIVER_MAP = {
     '12': 'ANT', '44': 'HAM', '63': 'RUS', '16': 'LEC', '1': 'NOR',
     '3': 'VER', '81': 'PIA', '6': 'HAD', '30': 'LAW', '10': 'GAS',
@@ -32,14 +21,13 @@ DRIVER_MAP = {
     '77': 'BOT', '11': 'PER'
 }
 
-# driver TSU : 22 update
-
-SESSION_ID = "2026_Dutch_GP_SQ"
+# ⚠️ Sprint Race සඳහා update කරලා තියෙනවා - verify කරන්න run කරන්න කලින්
+SESSION_ID = "2026_Dutch_GP_SR"
 
 driver_state = {}
 
 
-class DockerLocalTranslator(AddressTranslator):   # ← ADD THIS CLASS
+class DockerLocalTranslator(AddressTranslator):
     def translate(self, addr):
         return '127.0.0.1'
 
@@ -73,7 +61,7 @@ cluster = Cluster(
     ['127.0.0.1'],
     port=9042,
     connection_class=AsyncioConnection,
-    address_translator=DockerLocalTranslator()   # ← ADD THIS
+    address_translator=DockerLocalTranslator()
 )
 db_session = cluster.connect('f1_live')
 
@@ -116,7 +104,7 @@ def process_driver(driver_no):
 
 client = RealF1Client(
     topics=["CarData.z", "Position.z", "TimingData"],
-    log_file_name="sq_live_backup.json"
+    log_file_name="sr_live_backup.json"
 )
 
 
