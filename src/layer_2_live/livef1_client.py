@@ -20,7 +20,7 @@ DRIVER_MAP = {
     '77': 'BOT', '11': 'PER'
 }
 
-# ⚠️ Friday ට කලින් actual session එකට update කරන්න
+# ⚠️ Friday (manually update  කරපන්)
 SESSION_ID = "2026_British_FP1"
 
 # In-memory per-driver state cache
@@ -37,7 +37,7 @@ def get_state(driver_no):
 
 
 def is_valid_car_data(record):
-    """ Throttle/Brake 100% ට වඩා වැඩි values = invalid sensor reading
+    """ Throttle/Brake 100% > values = invalid sensor reading
         (session start/grid-park artifact) """
     throttle = record.get("Throttle", 0) or 0
     brake = record.get("Brake", 0) or 0
@@ -71,7 +71,7 @@ INSERT_QUERY = """
 def process_driver(driver_no):
     state = get_state(driver_no)
 
-    # සම්පූර්ණ data එකක් ලැබෙනකම් wait කරනවා (CarData + TimingData දෙකම ඕන)
+    # wait untill ful data
     if state["speed"] is None or state["gap_seconds"] is None:
         return
 

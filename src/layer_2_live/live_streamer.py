@@ -15,7 +15,7 @@ from src.ml_model import predict
 
 SESSION_ID = "DUMMY_TEST_SESSION"
 
-# Test කරන්න driver ටික (ඕන නම් ගොඩක් add කරන්න පුළුවන්)
+# Test ( punchi yuki into the grid (NOTE : for dutch GP))
 DRIVERS = ["VER", "HAM", "LEC", "NOR", "PIA"]
 
 
