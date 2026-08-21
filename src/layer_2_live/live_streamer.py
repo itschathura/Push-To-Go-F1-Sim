@@ -81,7 +81,7 @@ def stream_live_data():
 
     # Driver එකින් එකට වෙනම SoC state track කරන්න ඕන
     driver_soc = {d: 100.0 for d in DRIVERS}
-    delta_time = 2.0
+    delta_time = 1
     cycle = 0
 
     insert_query = """
