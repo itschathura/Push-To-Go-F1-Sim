@@ -2,7 +2,7 @@ import logging
 from fastf1.livetiming.client import SignalRClient
 
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format="%(asctime)s - %(levelname)s: %(message)s"
 )
 
@@ -20,30 +20,29 @@ FILENAME = "live_session_data.txt"
 
 client = SignalRClient(
     filename=FILENAME,
-    filemode='w',
-    timeout=0, # Set to 0 to disable timeout, so you can start it early!
-    no_auth=False # Will automatically use get_auth_token()
+    filemode='a',
+    timeout=0, # Set to 0 to disable timeout
+    no_auth=False
 )
 
 import time
 
-print("\nSince there is no active session right now, the server will reject connections (403).")
-print("This script will keep trying every 60 seconds until the Sprint Race goes live at 4 PM!")
+print("\nConnecting to Live Timing client...")
 
 while True:
     try:
-        print(f"\n[{time.strftime('%H:%M:%S')}] Attempting to connect to Live Timing...")
+        print(f"\n[{time.strftime('%H:%M:%S')}] Connecting to FastF1 Live Timing...")
         client.start()
-        print("\n🏁 Session ended or connection closed.")
-        break
+        print("\n⚠️ Connection closed by server. Retrying in 5 seconds...")
+        time.sleep(5)
     except KeyboardInterrupt:
         print("\n✅ Recording stopped by user.")
         break
     except Exception as e:
-        print(f"[{time.strftime('%H:%M:%S')}] Server is offline (Error: {e})")
-        print("Waiting 60 seconds before retrying...")
+        print(f"[{time.strftime('%H:%M:%S')}] Connection error ({e})")
+        print("Waiting 10 seconds before retrying...")
         try:
-            time.sleep(60)
+            time.sleep(10)
         except KeyboardInterrupt:
             print("\n✅ Recording stopped by user.")
             break
