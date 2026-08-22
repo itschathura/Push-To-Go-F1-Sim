@@ -7,19 +7,43 @@ logging.basicConfig(
 )
 
 print("="*60)
-print("  FastF1 Recorder - Authentication Test")
+print("  FastF1 Recorder - Live Session Recorder")
 print("="*60)
-print("1. When this runs, it may open a browser window.")
-print("2. Log in with your FREE F1 account.")
-print("3. Check this terminal to see if it says 'connected'.")
-print("   (Since no race is happening right now, it will just idle)")
-print("4. Press CTRL+C to stop the test.")
+print("1. When this runs, it may open a browser window to log in (if needed).")
+print("2. This script will stay connected indefinitely (timeout=0) to wait")
+print("   for the session to start.")
+print("3. Live data will be saved to 'live_session_data.txt'.")
+print("4. Press CTRL+C to stop the recording.")
 print("="*60)
 
-# Connects to F1 and records the raw text feed to this file
-client = SignalRClient("live_stream_data.txt")
+FILENAME = "live_session_data.txt"
 
-try:
-    client.start()
-except KeyboardInterrupt:
-    print("\nTest stopped.")
+client = SignalRClient(
+    filename=FILENAME,
+    filemode='w',
+    timeout=0, # Set to 0 to disable timeout, so you can start it early!
+    no_auth=False # Will automatically use get_auth_token()
+)
+
+import time
+
+print("\nSince there is no active session right now, the server will reject connections (403).")
+print("This script will keep trying every 60 seconds until the Sprint Race goes live at 4 PM!")
+
+while True:
+    try:
+        print(f"\n[{time.strftime('%H:%M:%S')}] Attempting to connect to Live Timing...")
+        client.start()
+        print("\n🏁 Session ended or connection closed.")
+        break
+    except KeyboardInterrupt:
+        print("\n✅ Recording stopped by user.")
+        break
+    except Exception as e:
+        print(f"[{time.strftime('%H:%M:%S')}] Server is offline (Error: {e})")
+        print("Waiting 60 seconds before retrying...")
+        try:
+            time.sleep(60)
+        except KeyboardInterrupt:
+            print("\n✅ Recording stopped by user.")
+            break

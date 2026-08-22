@@ -21,7 +21,7 @@ DRIVER_MAP = {
     '77': 'BOT', '11': 'PER', '41': 'LIN'
 }
 
-# ⚠️ Sprint Race සඳහා update කරලා තියෙනවා - verify කරන්න run කරන්න කලින්
+# ⚠️ Updated for Sprint Race - verify before running
 SESSION_ID = "2026_Dutch_GP_SR"
 
 driver_state = {}
