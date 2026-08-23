@@ -13,7 +13,7 @@ class DockerLocalTranslator(AddressTranslator):
     def translate(self, addr):
         return '127.0.0.1'
 
-st.set_page_config(page_title="Push to Go — F1 Live", page_icon="🏎️", layout="wide")
+st.set_page_config(page_title="Push to Go — F1 Live", page_icon="", layout="wide")
 
 st.markdown("""
 <style>
@@ -78,9 +78,12 @@ DRIVER_TEAM = {
 
 @st.cache_resource
 def get_db():
-    cluster = Cluster(['127.0.0.1'], port=9042, connection_class=AsyncioConnection,
-                      address_translator=DockerLocalTranslator())
-    return cluster.connect('f1_live')
+    try:
+        cluster = Cluster(['127.0.0.1'], port=9042, connection_class=AsyncioConnection,
+                          address_translator=DockerLocalTranslator())
+        return cluster.connect('f1_live')
+    except Exception as e:
+        return None
 
 def read_state():
     try:
@@ -156,7 +159,7 @@ def dashboard():
                     "laps": state.get("num_laps", {}).get(dc, 0),
                     "last_lap": state.get("last_laps", {}).get(dc, ""),
                 })
-            drivers_sorted.sort(key=lambda x: (x["pos"] if isinstance(x["pos"], int) else 99))
+            drivers_sorted.sort(key=lambda x: (int(x["pos"]) if str(x["pos"]).isdigit() else 99))
 
             for d in drivers_sorted:
                 tc = get_team_color(d["driver"])
@@ -207,13 +210,43 @@ def dashboard():
         if not sel:
             sel = "NOR"
 
+        # ── FLAG INDICATOR ──
+        latest_flag = ""
+        if state and state.get("flags") and len(state["flags"]) > 0:
+            latest_flag = state["flags"][-1].get("flag", "").upper()
+            if "RED" in latest_flag:
+                st.error("🔴 RED FLAG - SESSION SUSPENDED")
+            elif "YELLOW" in latest_flag:
+                st.warning(f"🟡 {latest_flag}")
+            elif "GREEN" in latest_flag or "CLEAR" in latest_flag:
+                st.success("🟢 GREEN FLAG - RACING")
+            elif "CHEQUERED" in latest_flag:
+                st.info("🏁 CHEQUERED FLAG")
+
         tc = get_team_color(sel)
         team_name = DRIVER_TEAM.get(sel, "")
         full_name = ""
         if state and state.get("driver_meta", {}).get(sel):
             full_name = state["driver_meta"][sel].get("full_name", "")
 
-        st.markdown(f'### <span style="color:{tc}">■</span> {sel} — {full_name} <span style="color:#484f58;font-size:0.7em">{team_name}</span>', unsafe_allow_html=True)
+        # Calculate Ahead and Behind
+        pos_str = ""
+        driver_ahead = None
+        driver_behind = None
+        
+        if state and state.get("positions"):
+            ds = [{"driver": dc, "pos": int(p) if str(p).isdigit() else 99} for dc, p in state["positions"].items()]
+            ds.sort(key=lambda x: x["pos"])
+            for i, d in enumerate(ds):
+                if d["driver"] == sel:
+                    pos_str = f"P{d['pos']}"
+                    if i > 0:
+                        driver_ahead = ds[i-1]["driver"]
+                    if i < len(ds) - 1:
+                        driver_behind = ds[i+1]["driver"]
+                    break
+
+        st.markdown(f'### <span style="color:{tc}">■</span> {pos_str} {sel} — {full_name} <span style="color:#484f58;font-size:0.7em">{team_name}</span>', unsafe_allow_html=True)
 
         # Gauges
         try:
@@ -231,11 +264,12 @@ def dashboard():
 
             m1, m2, m3, m4 = st.columns(4)
             pred = "🔥 OVERTAKE LIKELY" if r.overtake_prediction == 1 else "⚪ No overtake"
-            m1.metric("Prediction", pred)
-            m2.metric("Gap Ahead", f"{r.gap_to_ahead:.3f}s" if r.gap_to_ahead else "N/A")
-            m3.metric("SoC", f"{r.estimated_soc:.1f}%" if r.estimated_soc else "N/A")
-            car_data_flag = "✅ REAL" if (state and state.get("car_data_received")) else "⚠️ Simulated"
-            m4.metric("Telemetry", car_data_flag)
+            vs_ahead = f" vs {driver_ahead}" if driver_ahead else ""
+            
+            m1.metric(f"Prediction{vs_ahead}", pred)
+            m2.metric(f"Gap to {driver_ahead}" if driver_ahead else "Gap Ahead", f"{r.gap_to_ahead:.3f}s" if r.gap_to_ahead else "N/A")
+            m3.metric("Driver Behind", driver_behind if driver_behind else "None")
+            m4.metric("SoC", f"{r.estimated_soc:.1f}%" if r.estimated_soc else "N/A")
 
         # Sectors & Speeds from state
         if state:
