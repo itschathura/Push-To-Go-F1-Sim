@@ -9,11 +9,11 @@ from src.common.soc_calculator import calculate_estimated_soc
 from src.common.feature_engineering import calculate_acceleration, encode_compound
 from src.common import config
 
-# Process all rounds from 1 to 11
-ROUNDS = range(1, 12)  
+# Process all rounds from 1 to 13 | after Dutch GP
+ROUNDS = range(1, 13)  
 SESSION_TYPE = "R"   # Sprint (S) skipped - only Race data used for training
 
-OVERTAKE_LOOKAHEAD_ROWS = 20   # ~3 seconds, based on avg delta_time ~0.15s
+OVERTAKE_LOOKAHEAD_ROWS = 33   # ~5 seconds, based on avg delta_time ~0.15s
 OVERTAKE_GAP_THRESHOLD = 1.0   # Gap must be under this (seconds) to count as an overtake attempt
 
 
