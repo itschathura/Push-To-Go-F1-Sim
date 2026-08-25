@@ -13,6 +13,7 @@ from src.common import config
 ROUNDS = range(1, 13)  
 SESSION_TYPE = "R"   # Sprint (S) skipped - only Race data used for training
 
+#- 5 second done.
 OVERTAKE_LOOKAHEAD_ROWS = 33   # ~5 seconds, based on avg delta_time ~0.15s
 OVERTAKE_GAP_THRESHOLD = 1.0   # Gap must be under this (seconds) to count as an overtake attempt
 
