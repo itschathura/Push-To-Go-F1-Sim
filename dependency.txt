@@ -1,5 +1,6 @@
-F1 Overtake Prediction - Data Dependencies & Conditions
+F1 Overtake Prediction - Data Dependencies & Conditions - quick review
 
+for reminder...............
 1. Prediction Target Condition (Overtake_Success = 1)
 -----------------------------------------------------
 For the machine learning model to predict an overtake will happen, the following conditions must be met in the telemetry dataset during the lookahead window:
@@ -20,3 +21,5 @@ The XGBoost model relies on the following 10 data points (features) to determine
 - Gap_to_Ahead: Time gap to the car directly in front (seconds)
 - TyreLife: Number of laps completed on the current set of tires
 - Compound_Encoded: Numerical encoding of the tire compound used (Soft, Medium, Hard, etc.)
+
+
