@@ -21,22 +21,22 @@ fastf1.Cache.enable_cache(str(CACHE_DIR))
 
 def fetch_and_save_round_data(year, round_num, session_type):
     session_name = "Race" if session_type == 'R' else "Sprint"
+    raw_file_path = RAW_DIR / f"f1_{year}_R{round_num}_{session_type}_raw_laps.csv"
+    
+    if raw_file_path.exists():
+        print(f"[=] Round {round_num} ({session_type}) - already exists, skip.")
+        return
     
     print(f"\n{'-'*50}")
-    print(f"🏁 Fetching {session_name} Data | Year: {year} | Round: {round_num}")
+    print(f"Fetching {session_name} Data | Year: {year} | Round: {round_num}")
     print(f"{'-'*50}")
     
     try:
         session = fastf1.get_session(year, round_num, session_type)
-        
         session.load(telemetry=True, laps=True, weather=False)
         laps = session.laps
-        
-        raw_file_path = RAW_DIR / f"f1_{year}_R{round_num}_{session_type}_raw_laps.csv"
-        
         laps.to_csv(raw_file_path, index=False)
         print(f"✅ Successfully saved {session_name} Laps data to: {raw_file_path}")
-
     except Exception as e:
         print(f"❌ Error fetching {session_name} data for Round {round_num}: {e}")
 
