@@ -53,6 +53,13 @@ live_extra = {
 
 def save_state():
     live_extra["last_update"] = datetime.datetime.now().isoformat()
+    # Build a map using driver codes instead of numbers for the frontend
+    telemetry_by_code = {}
+    for dno, state in driver_state.items():
+        dc = DRIVER_MAP.get(dno, f"UNK_{dno}")
+        telemetry_by_code[dc] = state
+    live_extra["telemetry"] = telemetry_by_code
+    
     try:
         with open("live_state.tmp", 'w') as f:
             json.dump(live_extra, f)
@@ -72,8 +79,9 @@ def parse_data(data_str):
 def get_state(driver_no):
     if driver_no not in driver_state:
         driver_state[driver_no] = {
-            "speed": 0.0, "throttle": 0.0, "brake": 0.0, "rpm": 0,
-            "gap_seconds": 0.0, "soc": 100.0, "has_telemetry": False
+            "speed": 0.0, "throttle": 0.0, "brake": 0.0, "rpm": 0, "gear": 0,
+            "gap_seconds": 0.0, "soc": 100.0, "has_telemetry": False,
+            "has_car_data": False, "prediction": 0
         }
     return driver_state[driver_no]
 
@@ -90,12 +98,17 @@ def parse_gap_seconds(value):
 
 def process_and_insert(driver_no, state, session, insert_query, session_id):
     global live_extra
-    src_tag = "REAL" if state["has_telemetry"] else "SIM"
-    if not state["has_telemetry"]:
-        state["speed"] = 300 + random.uniform(-10, 20)
+    src_tag = "REAL" if state["has_car_data"] else "SIM"
+    # Simulate throttle/RPM/brake ONLY if real CarData.z has never arrived for this driver
+    if not state["has_car_data"]:
         state["throttle"] = 100 if random.random() > 0.1 else random.uniform(50, 100)
         state["brake"] = 0
         state["rpm"] = random.randint(10500, 12000)
+        state["gear"] = 8
+        if not state["has_telemetry"]:  # also sim speed if no speed-trap data
+            state["speed"] = 300 + random.uniform(-10, 20)
+    # Reset per-cycle flag so next call without CarData.z doesn't think it has live data
+    state["has_telemetry"] = False
 
     driver_code = DRIVER_MAP.get(driver_no, f"UNK_{driver_no}")
     
@@ -109,6 +122,7 @@ def process_and_insert(driver_no, state, session, insert_query, session_id):
         "Throttle": state["throttle"],
         "Brake": state["brake"]
     })
+    state["prediction"] = int(prediction)
 
     session.execute(insert_query, (
         driver_code, state["speed"], state["throttle"], state["brake"],
@@ -123,7 +137,8 @@ def main():
     import argparse
     parser = argparse.ArgumentParser(description="Tail F1 live data and stream to Cassandra")
     parser.add_argument("--from-start", action="store_true", help="Process from beginning of file")
-    parser.add_argument("--session", type=str, default="2026_Dutch_GP_Q", help="Session ID tag")
+    parser.add_argument("--replay", action="store_true", help="Slow down processing for offline dashboard testing")
+    parser.add_argument("--session", type=str, default="2026_Italian_GP_R", help="Session ID tag")
     args = parser.parse_args()
     session_id = args.session
     print(f"Session ID: {session_id}")
@@ -171,11 +186,14 @@ def main():
                     data = parse_data(data_str)
                     if not data: continue
                     lines = data.get('Lines', {})
+                    if not isinstance(lines, dict): continue
                     for driver_no, info in lines.items():
                         if driver_no.startswith('_'): continue
                         driver_code = DRIVER_MAP.get(driver_no, f"UNK_{driver_no}")
                         state = get_state(driver_no)
                         updated = False
+                        
+                        if not isinstance(info, dict): continue
                         
                         if 'Position' in info:
                             live_extra["positions"][driver_code] = info['Position']
@@ -202,12 +220,14 @@ def main():
                         if 'Sectors' in info:
                             if driver_code not in live_extra["sectors"]:
                                 live_extra["sectors"][driver_code] = {}
-                            for s_idx, s_data in info['Sectors'].items():
-                                if isinstance(s_data, dict) and 'Value' in s_data:
-                                    live_extra["sectors"][driver_code][s_idx] = s_data['Value']
+                            sectors = info['Sectors']
+                            if isinstance(sectors, dict):
+                                for s_idx, s_data in sectors.items():
+                                    if isinstance(s_data, dict) and 'Value' in s_data:
+                                        live_extra["sectors"][driver_code][s_idx] = s_data['Value']
 
                         speeds = info.get('Speeds', {})
-                        if speeds:
+                        if isinstance(speeds, dict) and speeds:
                             if driver_code not in live_extra["speeds"]:
                                 live_extra["speeds"][driver_code] = {}
                             for s_key in ('FL', 'ST', 'I1', 'I2'):
@@ -236,16 +256,22 @@ def main():
                             channels = car_info.get('Channels', {})
                             state = get_state(driver_no)
                             state["has_telemetry"] = True
+                            state["has_car_data"] = True  # Mark as having real car data permanently
                             if '2' in channels: state['speed'] = float(channels['2'])
                             if '4' in channels: state['throttle'] = float(channels['4'])
                             if '5' in channels: state['brake'] = float(channels['5'])
                             if '0' in channels: state['rpm'] = int(channels['0'])
+                            if '3' in channels: 
+                                try:
+                                    state['gear'] = int(channels['3'])
+                                except (ValueError, TypeError):
+                                    state['gear'] = 0
                             process_and_insert(driver_no, state, session, insert_query, session_id)
 
                 # ── WeatherData ──
                 elif topic == 'WeatherData':
                     w = parse_data(data_str)
-                    if w:
+                    if isinstance(w, dict):
                         live_extra["weather"] = {
                             "air_temp": w.get("AirTemp", ""), "track_temp": w.get("TrackTemp", ""),
                             "humidity": w.get("Humidity", ""), "wind_speed": w.get("WindSpeed", ""),
@@ -256,8 +282,11 @@ def main():
                 # ── RaceControlMessages ──
                 elif topic == 'RaceControlMessages':
                     rcm = parse_data(data_str)
-                    if rcm:
-                        for msg_id, msg in rcm.get("Messages", {}).items():
+                    if isinstance(rcm, dict):
+                        msgs = rcm.get("Messages", [])
+                        if isinstance(msgs, dict):
+                            msgs = msgs.values()
+                        for msg in msgs:
                             if isinstance(msg, dict):
                                 live_extra["flags"].append({
                                     "time": msg.get("Utc", ""),
@@ -269,42 +298,51 @@ def main():
                 # ── DriverList ──
                 elif topic == 'DriverList':
                     dl = parse_data(data_str)
-                    if dl:
-                        for num, info in dl.items():
+                    if isinstance(dl, dict):
+                        dl_items = dl.values() if isinstance(dl, dict) else dl
+                        for info in dl_items:
                             if not isinstance(info, dict): continue
+                            num = info.get("RacingNumber", "")
                             tla = info.get("Tla", DRIVER_MAP.get(num, ""))
                             if not tla: continue
                             live_extra["driver_meta"][tla] = {
                                 "full_name": info.get("FullName", ""),
                                 "team": info.get("TeamName", ""),
                                 "team_color": "#" + info.get("TeamColour", "FFFFFF"),
-                                "number": info.get("RacingNumber", num),
+                                "number": num,
                             }
 
                 # ── SessionStatus ──
                 elif topic == 'SessionStatus':
                     ss = parse_data(data_str)
-                    if ss:
+                    if isinstance(ss, dict):
                         live_extra["session_status"] = ss.get("Status", "Unknown")
 
                 # ── TimingAppData (tires) ──
                 elif topic == 'TimingAppData':
                     tad = parse_data(data_str)
-                    if tad:
-                        for driver_no, info in tad.get('Lines', {}).items():
+                    if isinstance(tad, dict):
+                        lines = tad.get('Lines', {})
+                        lines_items = lines.items() if isinstance(lines, dict) else enumerate(lines)
+                        for driver_no, info in lines_items:
                             if not isinstance(info, dict): continue
                             dc = DRIVER_MAP.get(driver_no, "")
                             if not dc: continue
                             stints = info.get('Stints', {})
-                            if stints:
+                            if isinstance(stints, dict) and stints:
                                 latest = max(stints.keys(), key=lambda x: int(x)) if stints else None
-                                if latest and isinstance(stints[latest], dict):
-                                    sd = stints[latest]
-                                    live_extra["tires"][dc] = {
-                                        "compound": sd.get("Compound", ""),
-                                        "new": sd.get("New", ""),
-                                        "laps": sd.get("TotalLaps", 0)
-                                    }
+                                sd = stints[latest]
+                            elif isinstance(stints, list) and stints:
+                                sd = stints[-1]
+                            else:
+                                sd = None
+                                
+                            if isinstance(sd, dict):
+                                live_extra["tires"][dc] = {
+                                    "compound": sd.get("Compound", ""),
+                                    "new": sd.get("New", ""),
+                                    "laps": sd.get("TotalLaps", 0)
+                                }
 
                 # Save state every 0.5s max
                 now = time.time()
@@ -312,8 +350,12 @@ def main():
                     save_state()
                     last_save = now
 
+                # If replay mode, add a tiny delay to simulate real-time speed for testing the dashboard
+                if args.replay:
+                    time.sleep(0.02)
+
             except Exception as e:
-                pass
+                print(f"[ERROR] Exception processing record: {e}", flush=True)
 
 if __name__ == '__main__':
     main()

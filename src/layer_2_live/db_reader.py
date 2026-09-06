@@ -17,7 +17,7 @@ def monitor_live_telemetry(limit=5, refresh_rate=2):
     
     try:
         while True:
-            # තිරය පැහැදිලි කිරීම (Clear terminal)
+            # (Clear terminal)
             os.system('cls' if os.name == 'nt' else 'clear')
             
             print("==========================================")
@@ -34,7 +34,7 @@ def monitor_live_telemetry(limit=5, refresh_rate=2):
             else:
                 print(df.to_string(index=False))
             
-            # 3. තත්පර ගණනක් රැඳී සිටීම
+            # 3. 
             time.sleep(refresh_rate)
             
     except KeyboardInterrupt:
@@ -50,5 +50,5 @@ def monitor_live_telemetry(limit=5, refresh_rate=2):
             print("🔌 Database connection closed.")
 
 if __name__ == "__main__":
-    # තත්පර 2න් 2කට අලුත් වෙන දත්ත පේළි 5ක් බලාගන්න
+ # 2s by 2s
     monitor_live_telemetry(limit=5, refresh_rate=2)

@@ -1,0 +1,94 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  --f1-red: #e10600;
+  --f1-dark-red: #a30000;
+  --f1-bg: #12151d;
+  --f1-panel-bg: #1a1e28;
+  --f1-tower-bg: #13161f;
+  --f1-border: #262c3b;
+  --f1-text: #ffffff;
+  --f1-muted: #838a9d;
+  --f1-accent-blue: #1e8fff;
+  --f1-accent-green: #00e676;
+  --f1-accent-yellow: #ffd600;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  background-color: var(--f1-bg);
+  color: var(--f1-text);
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+  user-select: none;
+}
+
+#root {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #12151d;
+}
+
+/* Custom subtle scrollbar */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #2b3142;
+  border-radius: 4px;
+}
+
+/* Battle Mode pulse animation */
+@keyframes battlePulse {
+  0% {
+    box-shadow: 0 0 10px rgba(225, 6, 0, 0.4);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(225, 6, 0, 0.9);
+    transform: scale(1.03);
+  }
+  100% {
+    box-shadow: 0 0 10px rgba(225, 6, 0, 0.4);
+    transform: scale(1);
+  }
+}
+
+.battle-active {
+  animation: battlePulse 1.2s infinite ease-in-out;
+}
+
+@keyframes driverPulsing {
+  0% {
+    r: 14;
+    opacity: 0.3;
+  }
+  50% {
+    r: 22;
+    opacity: 0.7;
+  }
+  100% {
+    r: 14;
+    opacity: 0.3;
+  }
+}
+
+.pulsing-radar {
+  animation: driverPulsing 1.8s infinite ease-in-out;
+}

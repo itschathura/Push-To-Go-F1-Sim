@@ -1,16 +1,30 @@
-#Data & models folders (~5GB)
+# Data & models (~5GB+)
 data/
-.venv/
 src/ml_model/saved_model.pkl
+
+# Python
+.venv/
+venv/
 __pycache__/
 *.pyc
-venv/
+*.pyo
+
+# Environment
 .env
 *.log
 
+# Live session artifacts (regenerated at runtime)
+live_state.json
+live_state.tmp
+live_session_data.txt
+*_live_backup.json
 
-# Large F1 datasets
-data/raw/
-data/processed/
-data/cache/
+# Node
+node_modules/
 
+# IDE
+.vscode/
+
+# Misc
+*.tmp
+project_tree.txt

@@ -21,8 +21,8 @@ DRIVER_MAP = {
     '77': 'BOT', '11': 'PER', '41': 'LIN'
 }
 
-# ⚠️ Updated for Sprint Race - verify before running
-SESSION_ID = "2026_Dutch_GP_SR"
+# ⚠️ Updated for Monza GP Race - 2026-09-06
+SESSION_ID = "2026_Italian_GP_R"
 
 driver_state = {}
 
@@ -131,7 +131,7 @@ def process_driver(driver_no):
 
 client = RealF1Client(
     topics=["CarData.z", "Position.z", "TimingData"],
-    log_file_name="sr_live_backup.json"
+    log_file_name="italian_gp_live_backup.json"
 )
 
 

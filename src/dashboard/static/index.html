@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Push To Go — F1 Live</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --bg:      #0b0d14;
+            --bg2:     #111420;
+            --bg3:     #161923;
+            --border:  #1e2336;
+            --text:    #dde1f0;
+            --muted:   #606880;
+            --red:     #e10600;
+            --blue:    #1e8fff;
+            --green:   #00cc66;
+            --yellow:  #ffa500;
+            --brake:   #555a70;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ─── TOPBAR ─────────────────────────────────────────────── */
+        .topbar {
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            height: 46px;
+            background: var(--bg2);
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+            gap: 12px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logo-bar { width: 22px; height: 3px; background: var(--red); border-radius: 2px; }
+        .logo-text {
+            font-weight: 900;
+            font-size: 1rem;
+            color: var(--red);
+            letter-spacing: 0.5px;
+        }
+        .logo-sub { color: var(--text); }
+
+        .topbar-weather {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            font-size: 0.72rem;
+            color: var(--muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .topbar-weather em { color: var(--text); font-style: normal; font-weight: 600; }
+        .live-pip { display: flex; align-items: center; gap: 5px; }
+        .pip { width: 7px; height: 7px; background: #00cc66; border-radius: 50%; animation: pip 1.4s infinite; }
+        @keyframes pip { 0%,100%{opacity:1} 50%{opacity:0.25} }
+
+        /* ─── BODY ───────────────────────────────────────────────── */
+        .body-wrap {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* ─── SIDEBAR ────────────────────────────────────────────── */
+        .sidebar {
+            width: 172px;
+            background: var(--bg2);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .sidebar-title {
+            font-size: 0.62rem;
+            font-weight: 700;
+            color: var(--muted);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            padding: 12px 14px 8px;
+            border-bottom: 1px solid var(--border);
+        }
+        .driver-list { overflow-y: auto; flex: 1; }
+
+        .lb-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            cursor: pointer;
+            border-left: 3px solid transparent;
+            transition: all 0.15s;
+        }
+        .lb-row:hover { background: rgba(255,255,255,0.03); }
+        .lb-row.active {
+            background: rgba(225,6,0,0.08);
+            border-left-color: var(--red);
+        }
+        .lb-pos { font-size: 0.62rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; width: 22px; }
+        .lb-bar { width: 3px; height: 16px; border-radius: 2px; flex-shrink: 0; }
+        .lb-code { font-size: 0.78rem; font-weight: 700; font-family: 'JetBrains Mono', monospace; flex: 1; }
+        .lb-gap { font-size: 0.62rem; color: var(--muted); font-family: 'JetBrains Mono', monospace; text-align: right; }
+
+        /* ─── MAIN ───────────────────────────────────────────────── */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px 24px;
+            gap: 16px;
+            overflow-y: auto;
+        }
+
+        .driver-title {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 4px solid #888;
+            padding-left: 12px;
+        }
+        #hdrColor { /* reused as border-left */ }
+        .driver-title-pos {
+            font-size: 0.8rem;
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        /* ─── GAUGES ROW ─────────────────────────────────────────── */
+        .gauges-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .gauge-card {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 16px 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+        .gauge-card-label {
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--muted);
+            text-transform: uppercase;
+            align-self: flex-start;
+        }
+
+        .ring-wrap {
+            position: relative;
+            width: 130px;
+            height: 130px;
+        }
+        .ring-wrap svg { width: 100%; height: 100%; }
+
+        .ring-bg { fill: none; stroke: #1a1f2e; stroke-width: 10; stroke-linecap: round; }
+        .ring-fg { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 0.08s linear; }
+
+        .ring-speed    { stroke: var(--blue); }
+        .ring-throttle { stroke: var(--green); filter: drop-shadow(0 0 6px rgba(0,204,102,0.5)); }
+        .ring-brake    { stroke: var(--brake); }
+        .ring-brake.active { stroke: var(--red); filter: drop-shadow(0 0 6px rgba(225,6,0,0.5)); }
+        .ring-rpm      { stroke: var(--yellow); filter: drop-shadow(0 0 6px rgba(255,165,0,0.4)); }
+
+        .ring-center {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .ring-val {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1.55rem;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1;
+        }
+        .ring-unit {
+            font-size: 0.6rem;
+            color: var(--muted);
+            letter-spacing: 1px;
+            margin-top: 3px;
+        }
+
+        /* ─── METRICS ROW ────────────────────────────────────────── */
+        .metrics-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        .metric-card {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 16px;
+        }
+        .metric-label { font-size: 0.58rem; color: var(--muted); letter-spacing: 1.5px; font-weight: 700; text-transform: uppercase; margin-bottom: 6px; }
+        .metric-val { font-family: 'JetBrains Mono', monospace; font-size: 1.15rem; color: #fff; font-weight: 700; }
+
+        /* ─── OVERTAKE BADGE ─────────────────────────────────────── */
+        .overtake-badge {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 14px 28px;
+            background: rgba(225,6,0,0.1);
+            border: 2px solid var(--red);
+            border-radius: 14px;
+            color: var(--red);
+            font-size: 1rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-align: center;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0;
+            transform: scale(0.92) translateY(6px);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            animation: glow 1s infinite alternate;
+        }
+        .overtake-badge.on { opacity: 1; transform: scale(1) translateY(0); }
+        @keyframes glow {
+            from { box-shadow: 0 0 10px rgba(225,6,0,0.25); }
+            to   { box-shadow: 0 0 30px rgba(225,6,0,0.75); }
+        }
+
+        /* scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar">
+    <div class="logo">
+        <div class="logo-bar"></div>
+        <div class="logo-text">PUSH TO GO <span class="logo-sub">— F1 LIVE</span></div>
+    </div>
+    <div class="topbar-weather" id="weatherBar">
+        <div class="live-pip"><div class="pip"></div> LIVE</div>
+    </div>
+</div>
+
+<div class="body-wrap">
+    <!-- Sidebar leaderboard -->
+    <div class="sidebar">
+        <div class="sidebar-title">Live Timing</div>
+        <div class="driver-list" id="driverList"></div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main">
+        <!-- Driver title -->
+        <div class="driver-title" id="driverTitle">
+            <span id="hdrDriver">NOR</span>
+            <span class="driver-title-pos" id="hdrPos"></span>
+        </div>
+
+        <!-- 4 gauge cards -->
+        <div class="gauges-row">
+            <!-- Speed -->
+            <div class="gauge-card">
+                <div class="gauge-card-label">Speed</div>
+                <div class="ring-wrap">
+                    <svg viewBox="0 0 120 120">
+                        <path class="ring-bg" d="M 18 102 A 52 52 0 1 1 102 102"/>
+                        <path class="ring-fg ring-speed" id="gSpeed"
+                              stroke-dasharray="310" stroke-dashoffset="310"
+                              d="M 18 102 A 52 52 0 1 1 102 102"/>
+                    </svg>
+                    <div class="ring-center">
+                        <div class="ring-val" id="vSpeed">0</div>
+                        <div class="ring-unit">km/h</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Throttle -->
+            <div class="gauge-card">
+                <div class="gauge-card-label">Throttle</div>
+                <div class="ring-wrap">
+                    <svg viewBox="0 0 120 120">
+                        <path class="ring-bg" d="M 18 102 A 52 52 0 1 1 102 102"/>
+                        <path class="ring-fg ring-throttle" id="gThrottle"
+                              stroke-dasharray="310" stroke-dashoffset="310"
+                              d="M 18 102 A 52 52 0 1 1 102 102"/>
+                    </svg>
+                    <div class="ring-center">
+                        <div class="ring-val" id="vThrottle">0</div>
+                        <div class="ring-unit">%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Brake -->
+            <div class="gauge-card">
+                <div class="gauge-card-label">Brake</div>
+                <div class="ring-wrap">
+                    <svg viewBox="0 0 120 120">
+                        <path class="ring-bg" d="M 18 102 A 52 52 0 1 1 102 102"/>
+                        <path class="ring-fg ring-brake" id="gBrake"
+                              stroke-dasharray="310" stroke-dashoffset="310"
+                              d="M 18 102 A 52 52 0 1 1 102 102"/>
+                    </svg>
+                    <div class="ring-center">
+                        <div class="ring-val" id="vBrake">0</div>
+                        <div class="ring-unit">%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RPM -->
+            <div class="gauge-card">
+                <div class="gauge-card-label">RPM</div>
+                <div class="ring-wrap">
+                    <svg viewBox="0 0 120 120">
+                        <path class="ring-bg" d="M 18 102 A 52 52 0 1 1 102 102"/>
+                        <path class="ring-fg ring-rpm" id="gRpm"
+                              stroke-dasharray="310" stroke-dashoffset="310"
+                              d="M 18 102 A 52 52 0 1 1 102 102"/>
+                    </svg>
+                    <div class="ring-center">
+                        <div class="ring-val" id="vRpm">0</div>
+                        <div class="ring-unit">rpm</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Metrics row -->
+        <div class="metrics-row">
+            <div class="metric-card">
+                <div class="metric-label">Gap to Leader</div>
+                <div class="metric-val" id="mGapLeader">--</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Gap Ahead</div>
+                <div class="metric-val" id="mGapAhead">--</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Estimated SoC</div>
+                <div class="metric-val" id="mSoc">--%</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-label">Tire</div>
+                <div class="metric-val" id="mTire">--</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fixed overtake badge - bottom right, NEVER shifts layout -->
+<div class="overtake-badge" id="predBanner">🔥 OVERTAKE<br>LIKELY</div>
+
+<script>
+    const TEAM_COLORS = {
+        'Mercedes':'#00D7B6','McLaren':'#FF8000','Ferrari':'#E8002D',
+        'Red Bull Racing':'#3671C6','Alpine':'#0093CC','Audi':'#E5002B',
+        'Racing Bulls':'#6692FF','Haas F1 Team':'#B6BABD',
+        'Aston Martin':'#358C75','Williams':'#37BEDD','Cadillac':'#909090'
+    };
+    const DRIVER_TEAM = {
+        'RUS':'Mercedes','ANT':'Mercedes','NOR':'McLaren','PIA':'McLaren',
+        'LEC':'Ferrari','HAM':'Ferrari','VER':'Red Bull Racing','LAW':'Red Bull Racing',
+        'GAS':'Alpine','COL':'Alpine','BOR':'Audi','HUL':'Audi',
+        'TSU':'Racing Bulls','LIN':'Racing Bulls','BEA':'Haas F1 Team','OCO':'Haas F1 Team',
+        'STR':'Aston Martin','ALO':'Aston Martin','ALB':'Williams','SAI':'Williams',
+        'BOT':'Cadillac','PER':'Cadillac'
+    };
+
+    let selectedDriver = 'NOR';
+
+    // ── Smooth lerp animation ───────────────────────────────────────
+    const anim = {
+        speed:    { cur: 0, tgt: 0 },
+        throttle: { cur: 0, tgt: 0 },
+        brake:    { cur: 0, tgt: 0 },
+        rpm:      { cur: 0, tgt: 0 },
+    };
+    const LERP = 0.12;
+    const DASH = 310; // stroke-dasharray length
+
+    function lerp(a, b, t) { return a + (b - a) * t; }
+
+    function setRing(id, val, max) {
+        const pct = Math.min(1, Math.max(0, val / max));
+        document.getElementById(id).style.strokeDashoffset = DASH * (1 - pct);
+    }
+
+    function renderLoop() {
+        requestAnimationFrame(renderLoop);
+        let dirty = false;
+        for (const k in anim) {
+            const a = anim[k];
+            const n = lerp(a.cur, a.tgt, LERP);
+            if (Math.abs(n - a.cur) > 0.05) { a.cur = n; dirty = true; }
+            else a.cur = a.tgt;
+        }
+        if (!dirty) return;
+
+        document.getElementById('vSpeed').textContent    = Math.round(anim.speed.cur);
+        document.getElementById('vThrottle').textContent = Math.round(anim.throttle.cur);
+        document.getElementById('vBrake').textContent    = Math.round(anim.brake.cur);
+        document.getElementById('vRpm').textContent      = Math.round(anim.rpm.cur);
+
+        setRing('gSpeed',    anim.speed.cur,    350);
+        setRing('gThrottle', anim.throttle.cur, 100);
+        setRing('gBrake',    anim.brake.cur,    100);
+        setRing('gRpm',      anim.rpm.cur,      13000);
+
+        // brake ring turns red when active
+        document.getElementById('gBrake').classList.toggle('active', anim.brake.cur > 2);
+    }
+    renderLoop();
+
+    // ── UI update ───────────────────────────────────────────────────
+    function updateUI(data) {
+        if (data.error) return;
+
+        // Weather
+        if (data.weather) {
+            const w = data.weather;
+            document.getElementById('weatherBar').innerHTML =
+                `<div class="live-pip"><div class="pip"></div> LIVE</div>
+                 🌡️ Track <em>${w.track_temp}°C</em>
+                 &nbsp; Air <em>${w.air_temp}°C</em>
+                 &nbsp; 💧 Humidity <em>${w.humidity}%</em>
+                 &nbsp; Rain <em style="color:${w.rain==='1'?'#f85149':'#aaa'}">${w.rain==='1'?'YES':'No'}</em>`;
+        }
+
+        // Leaderboard
+        const sorted = Object.keys(DRIVER_TEAM).map(dc => ({
+            dc, pos: data.positions?.[dc] ? parseInt(data.positions[dc]) : 99
+        })).sort((a,b) => a.pos !== b.pos ? a.pos-b.pos : a.dc.localeCompare(b.dc));
+
+        document.getElementById('driverList').innerHTML = sorted.map(d => {
+            const color = TEAM_COLORS[DRIVER_TEAM[d.dc]] || '#666';
+            const gap = data.gaps_to_leader?.[d.dc] || '';
+            const pos = d.pos === 99 ? '—' : `P${d.pos}`;
+            return `<div class="lb-row ${d.dc===selectedDriver?'active':''}" onclick="selectedDriver='${d.dc}'">
+                <span class="lb-pos">${pos}</span>
+                <div class="lb-bar" style="background:${color}"></div>
+                <span class="lb-code">${d.dc}</span>
+                <span class="lb-gap">${gap}</span>
+            </div>`;
+        }).join('');
+
+        // Driver header
+        const color = TEAM_COLORS[DRIVER_TEAM[selectedDriver]] || '#888';
+        document.getElementById('driverTitle').style.borderLeftColor = color;
+        document.getElementById('hdrDriver').textContent = selectedDriver;
+        const myPos = sorted.find(d=>d.dc===selectedDriver);
+        document.getElementById('hdrPos').textContent = myPos?.pos===99 ? '' : `P${myPos?.pos}`;
+
+        // Telemetry
+        const tel = data.telemetry?.[selectedDriver];
+        if (!tel) return;
+
+        anim.speed.tgt    = tel.speed    || 0;
+        anim.throttle.tgt = tel.throttle || 0;
+        anim.brake.tgt    = tel.brake    || 0;
+        anim.rpm.tgt      = tel.rpm      || 0;
+
+        // Metrics
+        document.getElementById('mGapLeader').textContent = data.gaps_to_leader?.[selectedDriver] || '--';
+        document.getElementById('mGapAhead').textContent  = tel.gap_seconds ? tel.gap_seconds.toFixed(3)+'s' : '--';
+        document.getElementById('mSoc').textContent       = tel.soc ? tel.soc.toFixed(1)+'%' : '--%';
+        const tire = data.tires?.[selectedDriver];
+        document.getElementById('mTire').textContent = tire ? `${tire.compound} (${tire.laps}L)` : '--';
+
+        // Overtake badge — fixed bottom-right, zero layout impact
+        document.getElementById('predBanner').classList.toggle('on', tel.prediction === 1);
+    }
+
+    async function fetchTelemetry() {
+        try { updateUI(await (await fetch('/api/telemetry')).json()); }
+        catch(e) {}
+    }
+    setInterval(fetchTelemetry, 100);
+    fetchTelemetry();
+</script>
+</body>
+</html>
