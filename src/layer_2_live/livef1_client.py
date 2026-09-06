@@ -114,7 +114,10 @@ def process_driver(driver_no):
     raw_data = {
         "Speed": speed,
         "Throttle": throttle,
-        "Brake": brake
+        "Brake": brake,
+        "RPM": rpm,
+        "Estimated_SoC": state["soc"],
+        "Gap_to_Ahead": gap,
     }
     prediction = predict.predict_single(raw_data)
 

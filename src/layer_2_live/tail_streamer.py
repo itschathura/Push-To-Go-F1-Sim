@@ -120,7 +120,10 @@ def process_and_insert(driver_no, state, session, insert_query, session_id):
     prediction = predict.predict_single({
         "Speed": state["speed"],
         "Throttle": state["throttle"],
-        "Brake": state["brake"]
+        "Brake": state["brake"],
+        "RPM": state["rpm"],
+        "Estimated_SoC": state["soc"],
+        "Gap_to_Ahead": state["gap_seconds"],
     })
     state["prediction"] = int(prediction)
 
