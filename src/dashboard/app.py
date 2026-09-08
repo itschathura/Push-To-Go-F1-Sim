@@ -348,7 +348,40 @@ def dashboard():
                 height=max(len(spd_data) * 22, 200), margin=dict(l=5,r=40,t=5,b=5),
                 xaxis={'showgrid': True, 'gridcolor': '#21262d', 'color': '#484f58'},
                 yaxis={'color': '#c9d1d9'}, font={'color': '#c9d1d9', 'size': 9})
-            st.plotly_chart(fig, use_container_width=True)
+    # ── FULL FIELD OVERVIEW TABLE ──
+    st.markdown("### 🏎️ FULL FIELD TELEMETRY & OVERTAKE PROBABILITIES")
+    if state and state.get("positions") and state.get("telemetry"):
+        table_data = []
+        for dc, pos in state["positions"].items():
+            driver_tel = state["telemetry"].get(dc, {})
+            gap = driver_tel.get("gap_seconds")
+            spd = driver_tel.get("speed")
+            soc = driver_tel.get("soc")
+            pred = driver_tel.get("prediction", 0)
+            
+            table_data.append({
+                "Pos": int(pos) if str(pos).isdigit() else 99,
+                "Driver": dc,
+                "Team": DRIVER_TEAM.get(dc, ""),
+                "Gap Ahead (s)": f"{gap:.3f}" if gap is not None else "—",
+                "Speed (km/h)": f"{spd:.1f}" if spd is not None else "—",
+                "Throttle (%)": f"{driver_tel.get('throttle', 0):.0f}",
+                "Brake (%)": f"{driver_tel.get('brake', 0):.0f}",
+                "Battery SoC (%)": f"{soc:.1f}" if soc is not None else "—",
+                "Overtake Likely?": "🔥 YES" if pred == 1 else "⚪ No"
+            })
+            
+        if table_data:
+            df_table = pd.DataFrame(table_data).sort_values("Pos")
+            
+            # Apply some basic styling for Streamlit's dataframe
+            st.dataframe(
+                df_table, 
+                use_container_width=True, 
+                hide_index=True,
+                height=400
+            )
+    else:
+        st.info("Waiting for full field telemetry data to build table...")
 
 dashboard()
-

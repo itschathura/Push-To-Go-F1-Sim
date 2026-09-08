@@ -36,7 +36,7 @@ def get_state(driver_no):
     if driver_no not in driver_state:
         driver_state[driver_no] = {
             "speed": None, "throttle": None, "brake": None, "rpm": None,
-            "gap_seconds": None, "soc": 100.0
+            "gap_seconds": None, "soc": 100.0, "prev_speed": None
         }
     return driver_state[driver_no]
 
@@ -105,9 +105,14 @@ def process_driver(driver_no):
     speed = safe_float(state["speed"])
     rpm = safe_int(state["rpm"])
     gap = safe_float(state["gap_seconds"])
+    prev_speed = safe_float(state.get("prev_speed", speed))
+
+    delta_time = 0.27
+    acceleration = ((speed - prev_speed) / 3.6) / delta_time
+    state["prev_speed"] = speed
 
     state["soc"] = soc_calculator.calculate_estimated_soc(
-        throttle, brake, 0.0, state["soc"], delta_time=0.27
+        throttle, brake, acceleration, state["soc"], delta_time=delta_time
     )
     state["soc"] = max(0.0, min(100.0, state["soc"]))
 
@@ -116,6 +121,7 @@ def process_driver(driver_no):
         "Throttle": throttle,
         "Brake": brake,
         "RPM": rpm,
+        "Acceleration": acceleration,
         "Estimated_SoC": state["soc"],
         "Gap_to_Ahead": gap,
     }

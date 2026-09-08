@@ -46,6 +46,8 @@ live_extra = {
     "num_laps": {},
     "gaps_to_leader": {},
     "gaps_to_ahead": {},
+    "current_lap": 1,
+    "total_laps": 53,
     "car_data_received": False,
     "last_update": "",
     "records_processed": 0
@@ -81,7 +83,7 @@ def get_state(driver_no):
         driver_state[driver_no] = {
             "speed": 0.0, "throttle": 0.0, "brake": 0.0, "rpm": 0, "gear": 0,
             "gap_seconds": 0.0, "soc": 100.0, "has_telemetry": False,
-            "has_car_data": False, "prediction": 0
+            "has_car_data": False, "prediction": 0, "prev_speed": 0.0
         }
     return driver_state[driver_no]
 
@@ -96,7 +98,7 @@ def parse_gap_seconds(value):
     except Exception:
         return None
 
-def process_and_insert(driver_no, state, session, insert_query, session_id):
+def process_and_insert(driver_no, state, session, insert_query, session_id, is_catching_up=False):
     global live_extra
     src_tag = "REAL" if state["has_car_data"] else "SIM"
     # Simulate throttle/RPM/brake ONLY if real CarData.z has never arrived for this driver
@@ -112,8 +114,14 @@ def process_and_insert(driver_no, state, session, insert_query, session_id):
 
     driver_code = DRIVER_MAP.get(driver_no, f"UNK_{driver_no}")
     
+    # Calculate acceleration (m/s^2) for SoC & Prediction
+    delta_time = 0.27
+    prev_speed = state.get("prev_speed", state["speed"])
+    acceleration = ((state["speed"] - prev_speed) / 3.6) / delta_time
+    state["prev_speed"] = state["speed"]
+    
     state["soc"] = soc_calculator.calculate_estimated_soc(
-        state["throttle"], state["brake"], 0.0, state["soc"], delta_time=0.27
+        state["throttle"], state["brake"], acceleration, state["soc"], delta_time=delta_time
     )
     state["soc"] = max(0.0, min(100.0, state["soc"]))
 
@@ -122,17 +130,26 @@ def process_and_insert(driver_no, state, session, insert_query, session_id):
         "Throttle": state["throttle"],
         "Brake": state["brake"],
         "RPM": state["rpm"],
+        "Acceleration": acceleration,
         "Estimated_SoC": state["soc"],
         "Gap_to_Ahead": state["gap_seconds"],
     })
     state["prediction"] = int(prediction)
 
-    session.execute(insert_query, (
-        driver_code, state["speed"], state["throttle"], state["brake"],
-        state["rpm"], prediction, state["soc"], state["gap_seconds"], session_id
-    ))
-    
     live_extra["records_processed"] += 1
+
+    # During initial catch-up, skip slow DB network roundtrips and terminal printing
+    if is_catching_up:
+        return
+
+    try:
+        session.execute(insert_query, (
+            driver_code, state["speed"], state["throttle"], state["brake"],
+            state["rpm"], prediction, state["soc"], state["gap_seconds"], session_id
+        ))
+    except Exception:
+        pass
+
     print(f"[{src_tag}] {driver_code:>4} | Speed:{state['speed']:>6.1f} | Thr:{state['throttle']:>5.1f} | Brk:{state['brake']:>5.1f} | RPM:{state['rpm']:>5} | Gap:{state['gap_seconds']:>6.3f}s | Pred:{prediction}", flush=True)
 
 def main():
@@ -162,8 +179,11 @@ def main():
     print(f"Tailing {filename}...")
     
     last_save = 0
+    is_catching_up = True if args.from_start else False
+    if is_catching_up:
+        print("⚡ Catching up to live session data at maximum speed (0 latency)...")
 
-    with open(filename, 'r', encoding='utf-8') as f:
+    with open(filename, 'r', encoding='utf-8', errors='replace') as f:
         if not args.from_start and os.path.exists(filename):
             size = os.path.getsize(filename)
             if size > 30000:
@@ -174,7 +194,13 @@ def main():
         while True:
             line = f.readline()
             if not line:
-                time.sleep(0.2)
+                if is_catching_up:
+                    is_catching_up = False
+                    save_state()
+                    print("\n" + "=" * 60)
+                    print("  ⚡ CAUGHT UP TO LIVE STREAM! ZERO-DELAY REALTIME TELEMETRY ACTIVE")
+                    print("=" * 60 + "\n", flush=True)
+                time.sleep(0.05)
                 f.seek(f.tell())
                 continue
             
@@ -243,7 +269,7 @@ def main():
                                     except ValueError:
                                         pass
                         if updated:
-                            process_and_insert(driver_no, state, session, insert_query, session_id)
+                            process_and_insert(driver_no, state, session, insert_query, session_id, is_catching_up)
 
                 # ── CarData.z ──
                 elif topic == 'CarData.z':
@@ -269,7 +295,7 @@ def main():
                                     state['gear'] = int(channels['3'])
                                 except (ValueError, TypeError):
                                     state['gear'] = 0
-                            process_and_insert(driver_no, state, session, insert_query, session_id)
+                            process_and_insert(driver_no, state, session, insert_query, session_id, is_catching_up)
 
                 # ── WeatherData ──
                 elif topic == 'WeatherData':
@@ -321,6 +347,31 @@ def main():
                     if isinstance(ss, dict):
                         live_extra["session_status"] = ss.get("Status", "Unknown")
 
+                # ── TopThree ──
+                elif topic == 'TopThree':
+                    tt = parse_data(data_str)
+                    if isinstance(tt, dict):
+                        lines = tt.get('Lines')
+                        if isinstance(lines, list):
+                            for entry in lines:
+                                if isinstance(entry, dict) and 'Tla' in entry and 'Position' in entry:
+                                    live_extra["positions"][entry['Tla']] = str(entry['Position'])
+                        elif isinstance(lines, dict):
+                            for idx_str, entry in lines.items():
+                                if isinstance(entry, dict) and 'Position' in entry:
+                                    tla = entry.get('Tla') or DRIVER_MAP.get(entry.get('RacingNumber', ''))
+                                    if tla:
+                                        live_extra["positions"][tla] = str(entry['Position'])
+
+                # ── LapCount ──
+                elif topic == 'LapCount':
+                    lc = parse_data(data_str)
+                    if isinstance(lc, dict):
+                        if 'CurrentLap' in lc:
+                            live_extra["current_lap"] = lc['CurrentLap']
+                        if 'TotalLaps' in lc:
+                            live_extra["total_laps"] = lc['TotalLaps']
+
                 # ── TimingAppData (tires) ──
                 elif topic == 'TimingAppData':
                     tad = parse_data(data_str)
@@ -347,9 +398,9 @@ def main():
                                     "laps": sd.get("TotalLaps", 0)
                                 }
 
-                # Save state every 0.5s max
+                # Save state every 0.1s max for realtime dashboard updates
                 now = time.time()
-                if now - last_save > 0.5:
+                if now - last_save > 0.1:
                     save_state()
                     last_save = now
 

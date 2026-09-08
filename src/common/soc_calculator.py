@@ -1,19 +1,21 @@
 """
 soc_calculator.py
 ------------------
- import Layer 1 (training CSV), Layer 2 (live streamer) shared logic. based on FIA 2026 Power Unit Technical Regulations
+Shared logic across Layer 1 (training CSV) and Layer 2 (live streamer),
+grounded in the FIA 2026 Power Unit Technical Regulations.
 
-VERIFIED CONSTANTS (cited: FIA 2026 Technical Regulations, ESPN, Raceteq):
-  - Battery usable capacity (SoC window): 4 MJ = 4000 kJ
-  - MGU-K max power (both deploy AND harvest): 350 kW
-  - Base rate = (350 kW / 4000 kJ) × 100 = 8.75 %/second
-  - Verified against: 4MJ full deployment = ~11.4s (matches published
-    "4MJ bursts = 11.5s of full ERS-K power" figure)
-
-⚠️ CORRECTION NOTE: "Super Clipping" is a CHARGING event, not draining.
-   At full throttle but not accelerating (drag-limited top speed), the
-   ICE has surplus power beyond what the wheels need - that surplus is
-   diverted to the battery via MGU-K.
+VERIFIED 2026 TECHNICAL ARCHITECTURE:
+  - Battery usable capacity (SoC window): 4 MJ = 4000 kJ (FIA Maximum Delta SoC)
+  - MGU-K peak power: 350 kW (~469 hp), compared with 120 kW previously
+  - ICE output falls to ~400 kW (~536 hp), shifting electrical contribution
+    to roughly half (~47%) of total power unit output (~750 kW total)
+  - Deployment: Regulated up to 350 kW in key straight/overtake zones and
+    250 kW baseline, smoothly governed by energy management rather than binary switches
+  - 4 Energy Recovery Streams:
+    1. Braking (kinetic harvesting up to 350 kW)
+    2. Lift-Off / Coasting (pre-braking regeneration)
+    3. Part-Throttle (diverting excess ICE torque while cornering)
+    4. Super-Clipping (harvesting surplus ICE power at V-max drag-limited straights)
 """
 
 BATTERY_CAPACITY_KJ = 4000.0  # 4 MJ - FIA "Maximum delta SoC"
@@ -30,33 +32,66 @@ def calculate_estimated_soc(
     drs_active: int = 0,
 ) -> float:
     """
-    Args:
-        throttle: 0-100 අතර throttle %
-        brake: 0-100 අතර brake % (>0 means braking/regen active)
-        acceleration: m/s^2
-        previous_soc: previous row soc(0-100)
-        delta_time: dt (seconds) - time difference between current and previous row
-        drs_active: DRS/Overtake Mode active ද (0/1)
-
-    Returns:
-       new battery soc(0-100)
+    Simulates 2026 F1 Power Unit 350 kW MGU-K Battery State of Charge (SoC).
+    
+    Energy Recovery Sources (2026 Regulations):
+    1. 🛑 Braking: Kinetic energy converted by MGU-K into electrical energy
+    2. 🚗 Lift-Off / Coasting: Kinetic recovery during lift-and-coast before braking zones
+    3. ⚡ Part-Throttle: ICE torque diverted via MGU-K to recharge while cornering
+    4. 🏎️ Super Clipping: High-speed straight line where ICE surplus power recharges battery
+    5. 🚀 Deployment: Full throttle acceleration deploying up to 350 kW to rear wheels
     """
     if delta_time <= 0 or delta_time > 2.0:
         return previous_soc
 
     current_soc = previous_soc
 
+    # 1. 🛑 BRAKING: Primary kinetic energy harvesting via MGU-K
     if brake > 0:
-        # Braking - MGU-K harvesting (regenerative braking)
         current_soc = min(100.0, current_soc + (BASE_RATE_PER_SECOND * delta_time))
 
-    elif throttle == 100 and acceleration > 0:
-        # Full throttle, accelerating - MGU-K deploying (draining)
-        deploy_multiplier = 1.0 if drs_active else 0.7
+    # 2. 🚗 LIFT-OFF / COASTING: Zero/minimal throttle without brake pedal
+    elif throttle < 10.0:
+        # Kinetic harvesting during lift-and-coast phase before braking
+        current_soc = min(100.0, current_soc + (BASE_RATE_PER_SECOND * 0.55 * delta_time))
+
+    # 3. ⚡ PART-THROTTLE HARVESTING: Cornering & traction modulation
+    elif throttle < 80.0:
+        # ICE produces surplus torque beyond tire traction limit; MGU-K harvests it
+        harvest_ratio = ((80.0 - throttle) / 80.0) * 0.40
+        current_soc = min(100.0, current_soc + (BASE_RATE_PER_SECOND * harvest_ratio * delta_time))
+
+    # 4. 🏎️ SUPER CLIPPING: Full throttle at high speed, drag-limited acceleration
+    elif throttle >= 80.0 and acceleration <= 0.8:
+        # End of straights: car is near V-max. ICE surplus power is diverted directly to battery
+        current_soc = min(100.0, current_soc + (BASE_RATE_PER_SECOND * 0.65 * delta_time))
+
+    # 5. 🚀 DEPLOYMENT: Full throttle with positive acceleration
+    elif throttle >= 80.0 and acceleration > 0.8:
+        # Full electrical power deployment (up to 350 kW / 469 hp)
+        deploy_multiplier = 1.0 if drs_active else 0.75
         current_soc = max(0.0, current_soc - (BASE_RATE_PER_SECOND * deploy_multiplier * delta_time))
 
-    elif throttle == 100 and acceleration <= 0:
-        # Super Clipping = CHARGING (surplus ICE power -> battery)
-        current_soc = min(100.0, current_soc + (BASE_RATE_PER_SECOND * 0.5 * delta_time))
-
     return current_soc
+
+
+def calculate_available_mguk_power(soc: float, is_overtake_zone: bool = True) -> float:
+    """
+    Calculates sustainable MGU-K electrical power output (kW) based on current SoC
+    and regulatory zone limits.
+    
+    FIA 2026 Technical Regulations:
+    - Maximum peak power: 350 kW in key overtake / straight acceleration zones
+    - Baseline race power: 250 kW in standard traction zones
+    - Scaled smoothly as SoC declines (continuous de-escalation rather than crude binary cutoffs)
+    """
+    max_zone_power = 350.0 if is_overtake_zone else 250.0
+    if soc >= 50.0:
+        return max_zone_power
+    elif soc >= 15.0:
+        # Proportional continuous scaling between 15% and 50% SoC
+        ratio = (soc - 15.0) / (50.0 - 15.0)
+        return 120.0 + ratio * (max_zone_power - 120.0)
+    else:
+        # Low energy reserve: power output is restricted to protect cell voltage
+        return max(0.0, (soc / 15.0) * 120.0)

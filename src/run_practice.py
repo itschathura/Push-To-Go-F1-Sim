@@ -31,7 +31,8 @@ def main():
         print("Starting FastF1 Recorder (SignalR)...")
         proc_recorder = subprocess.Popen([python_exec, recorder_script])
         processes.append(proc_recorder)
-        time.sleep(2)
+        print("Waiting for SignalR stream connection...")
+        time.sleep(5)
 
         print("Starting Tail Streamer (Cassandra & State Logic)...")
         proc_streamer = subprocess.Popen([python_exec, streamer_script, "--from-start", "--session", "2026_Italian_GP_R"])
