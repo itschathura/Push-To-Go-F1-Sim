@@ -9,8 +9,8 @@ from src.common.soc_calculator import calculate_estimated_soc
 from src.common.feature_engineering import calculate_acceleration, encode_compound
 from src.common import config
 
-# Process all rounds from 1 to 13 | after Dutch GP
-ROUNDS = range(1, 13)  
+# Process all rounds from 1 to 14 | including Monza GP
+ROUNDS = range(1, 14)  
 SESSION_TYPE = "R"   # Sprint (S) skipped - only Race data used for training
 
 #- 5 second done.
