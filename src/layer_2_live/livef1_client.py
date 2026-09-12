@@ -22,7 +22,7 @@ DRIVER_MAP = {
 }
 
 # ⚠️ Updated for Monza GP Race - 2026-09-06
-SESSION_ID = "2026_Italian_GP_R"
+SESSION_ID = "2026_Madrid_GP_R"
 
 driver_state = {}
 
