@@ -1,6 +1,7 @@
 import sys, os
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
+from src.common import cassandra_compat
 from livef1.adapters import RealF1Client
 from cassandra.cluster import Cluster
 from cassandra.io.asyncioreactor import AsyncioConnection
@@ -21,8 +22,8 @@ DRIVER_MAP = {
     '77': 'BOT', '11': 'PER', '41': 'LIN'
 }
 
-# ⚠️ Updated for Monza GP Race - 2026-09-06
-SESSION_ID = "2026_Madrid_GP_R"
+# ⚠️ Updated for Madrid GP Qualifying - 2026-09-12/13
+SESSION_ID = "2026_Madrid_GP_Q"
 
 driver_state = {}
 
@@ -140,7 +141,7 @@ def process_driver(driver_no):
 
 client = RealF1Client(
     topics=["CarData.z", "Position.z", "TimingData"],
-    log_file_name="italian_gp_live_backup.json"
+    log_file_name="madrid_gp_live_backup.json"
 )
 
 

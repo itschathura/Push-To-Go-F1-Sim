@@ -1,6 +1,10 @@
 import pandas as pd
 import time
 import os
+import sys
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+from src.common import cassandra_compat
 from cassandra.cluster import Cluster
 
 def monitor_live_telemetry(limit=5, refresh_rate=2):

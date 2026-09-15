@@ -7,7 +7,7 @@ import webbrowser
 
 def main():
     print("=" * 60)
-    print("  🚀 PUSH TO GO - LIVE PRACTICE RUNNER")
+    print("  >> PUSH TO GO - LIVE PRACTICE RUNNER")
     print("=" * 60)
     
     root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -34,13 +34,14 @@ def main():
         print("Waiting for SignalR stream connection...")
         time.sleep(5)
 
-        print("Starting Tail Streamer (Cassandra & State Logic)...")
-        proc_streamer = subprocess.Popen([python_exec, streamer_script, "--from-start", "--session", "2026_Italian_GP_R"])
+        print("Starting Tail Streamer (live tail mode - Madrid GP Race)...")
+        # NOTE: No --from-start here. We tail ONLY new live data the recorder appends.
+        # Using --from-start would replay the old Monza race file and skip DB writes during catch-up.
+        proc_streamer = subprocess.Popen([python_exec, streamer_script, "--session", "2026_Madrid_GP_R"])
         processes.append(proc_streamer)
 
-        print("=" * 60)
-        print("✅ All services started successfully!")
-        print("🌍 Dashboard is available at: http://localhost:8000")
+        print("[OK] All services started successfully!")
+        print("[DASHBOARD] http://localhost:8000")
         print("Press Ctrl+C to stop all services.")
         print("=" * 60)
         

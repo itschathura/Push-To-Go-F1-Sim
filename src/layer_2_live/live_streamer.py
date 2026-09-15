@@ -9,6 +9,7 @@ if sys.platform == 'win32':
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
+from src.common import cassandra_compat
 from cassandra.cluster import Cluster
 from cassandra.io.asyncioreactor import AsyncioConnection
 from cassandra.policies import AddressTranslator

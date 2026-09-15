@@ -7,12 +7,13 @@ import zlib
 import base64
 import random
 import datetime
-from cassandra.cluster import Cluster
-from cassandra.io.asyncioreactor import AsyncioConnection
-from cassandra.policies import AddressTranslator
 import asyncio
 
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
+from src.common import cassandra_compat
+from cassandra.cluster import Cluster
+from cassandra.io.asyncioreactor import AsyncioConnection
+from cassandra.policies import AddressTranslator
 from src.common import soc_calculator
 from src.ml_model import predict
 
@@ -101,24 +102,38 @@ def parse_gap_seconds(value):
 def process_and_insert(driver_no, state, session, insert_query, session_id, is_catching_up=False):
     global live_extra
     src_tag = "REAL" if state["has_car_data"] else "SIM"
-    # Simulate throttle/RPM/brake ONLY if real CarData.z has never arrived for this driver
-    if not state["has_car_data"]:
-        state["throttle"] = 100 if random.random() > 0.1 else random.uniform(50, 100)
-        state["brake"] = 0
-        state["rpm"] = random.randint(10500, 12000)
-        state["gear"] = 8
-        if not state["has_telemetry"]:  # also sim speed if no speed-trap data
-            state["speed"] = 300 + random.uniform(-10, 20)
-    # Reset per-cycle flag so next call without CarData.z doesn't think it has live data
-    state["has_telemetry"] = False
 
-    driver_code = DRIVER_MAP.get(driver_no, f"UNK_{driver_no}")
-    
+    if not state["has_car_data"] and not state["has_telemetry"]:
+        # Sim speed smoothly if no real speed-trap data
+        target = 320.0 if random.random() > 0.2 else 120.0
+        state["speed"] = state.get("speed", 0.0) * 0.8 + target * 0.2
+
     # Calculate acceleration (m/s^2) for SoC & Prediction
     delta_time = 0.27
     prev_speed = state.get("prev_speed", state["speed"])
     acceleration = ((state["speed"] - prev_speed) / 3.6) / delta_time
     state["prev_speed"] = state["speed"]
+
+    # Simulate throttle/RPM/brake ONLY if real CarData.z has never arrived for this driver
+    if not state["has_car_data"]:
+        if acceleration < -3.0: # Braking
+            state["brake"] = min(100.0, abs(acceleration) * 5.0 + random.uniform(0, 20))
+            state["throttle"] = 0.0
+            state["rpm"] = random.randint(7000, 10500)
+        elif acceleration < 0.0: # Coasting
+            state["brake"] = 0.0
+            state["throttle"] = random.uniform(0, 40)
+            state["rpm"] = random.randint(9000, 11000)
+        else: # Accelerating
+            state["brake"] = 0.0
+            state["throttle"] = random.uniform(80, 100)
+            state["rpm"] = random.randint(10500, 12000)
+        state["gear"] = max(1, min(8, int(state["speed"] / 40.0)))
+        
+    # Reset per-cycle flag so next call without CarData.z doesn't think it has live data
+    state["has_telemetry"] = False
+
+    driver_code = DRIVER_MAP.get(driver_no, f"UNK_{driver_no}")
     
     state["soc"] = soc_calculator.calculate_estimated_soc(
         state["throttle"], state["brake"], acceleration, state["soc"], delta_time=delta_time
@@ -175,7 +190,10 @@ def main():
         VALUES (%s, toTimestamp(now()), %s, %s, %s, %s, %s, %s, %s, %s)
     """
 
-    filename = "live_session_data.txt"
+    # Always tail from the project root regardless of CWD
+    _script_dir = os.path.dirname(os.path.abspath(__file__))
+    _project_root = os.path.abspath(os.path.join(_script_dir, "..", ".."))
+    filename = os.path.join(_project_root, "live_session_data.txt")
     print(f"Tailing {filename}...")
     
     last_save = 0
@@ -286,11 +304,19 @@ def main():
                             state = get_state(driver_no)
                             state["has_telemetry"] = True
                             state["has_car_data"] = True  # Mark as having real car data permanently
-                            if '2' in channels: state['speed'] = float(channels['2'])
-                            if '4' in channels: state['throttle'] = float(channels['4'])
-                            if '5' in channels: state['brake'] = float(channels['5'])
+                            if '2' in channels:
+                                spd = float(channels['2'])
+                                state['speed'] = spd if spd <= 400 else 0.0
+                            if '4' in channels:
+                                # 104 = F1 end-of-session / parked sentinel (sensor disabled)
+                                thr = float(channels['4'])
+                                state['throttle'] = thr if thr <= 100 else 0.0
+                            if '5' in channels:
+                                # 104 = F1 end-of-session / parked sentinel (sensor disabled)
+                                brk = float(channels['5'])
+                                state['brake'] = brk if brk <= 100 else 0.0
                             if '0' in channels: state['rpm'] = int(channels['0'])
-                            if '3' in channels: 
+                            if '3' in channels:
                                 try:
                                     state['gear'] = int(channels['3'])
                                 except (ValueError, TypeError):
