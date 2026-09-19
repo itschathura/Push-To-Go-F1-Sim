@@ -36,7 +36,7 @@ def main():
 
         print("Starting Tail Streamer (live tail mode - Madrid GP Race)...")
         # NOTE: No --from-start here. We tail ONLY new live data the recorder appends.
-        # Using --from-start would replay the old Monza race file and skip DB writes during catch-up.
+        # Using --from-start would replay the entire Madrid GP file and skip DB writes during catch-up.
         proc_streamer = subprocess.Popen([python_exec, streamer_script, "--session", "2026_Madrid_GP_R"])
         processes.append(proc_streamer)
 

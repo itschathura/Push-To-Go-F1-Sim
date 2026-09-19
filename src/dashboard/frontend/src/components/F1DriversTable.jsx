@@ -180,7 +180,7 @@ export function F1DriversTable({ data, onSelectBattleDriver }) {
                         {tire.compound ? tire.compound.charAt(0) : '?'}
                       </span>
                       <span className="font-mono text-[12px] text-white/60">
-                        {tire.laps_on_compound !== undefined ? `L${tire.laps_on_compound}` : '-'}
+                        {tire.laps !== undefined ? `L${tire.laps}` : '-'}
                       </span>
                     </div>
                   </td>
