@@ -1,6 +1,6 @@
 # --- FastF1 Season Settings ---
 YEAR = 2026
-ROUNDS = range(1, 14)  # Include Monza (Round 13)
+ROUNDS = range(1, 15)  # Include Azerbaijan (Round 14)
 SESSION_TYPE = "R"
 
 # --- Cache Path ---

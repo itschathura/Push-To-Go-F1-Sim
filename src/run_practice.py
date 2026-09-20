@@ -34,10 +34,10 @@ def main():
         print("Waiting for SignalR stream connection...")
         time.sleep(5)
 
-        print("Starting Tail Streamer (live tail mode - Madrid GP Race)...")
+        print("Starting Tail Streamer (live tail mode - Azerbaijan GP Race)...")
         # NOTE: No --from-start here. We tail ONLY new live data the recorder appends.
-        # Using --from-start would replay the entire Madrid GP file and skip DB writes during catch-up.
-        proc_streamer = subprocess.Popen([python_exec, streamer_script, "--session", "2026_Madrid_GP_R"])
+        # Using --from-start would replay the entire Azerbaijan GP file and skip DB writes during catch-up.
+        proc_streamer = subprocess.Popen([python_exec, streamer_script, "--session", "2026_Azerbaijan_GP_R"])
         processes.append(proc_streamer)
 
         print("[OK] All services started successfully!")
