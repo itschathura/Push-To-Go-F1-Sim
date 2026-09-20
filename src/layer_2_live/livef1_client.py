@@ -22,8 +22,8 @@ DRIVER_MAP = {
     '77': 'BOT', '11': 'PER', '41': 'LIN'
 }
 
-# ⚠️ Updated for Madrid GP Qualifying - 2026-09-12/13
-SESSION_ID = "2026_Madrid_GP_Q"
+# ⚠️ Updated for Azerbaijan GP
+SESSION_ID = "2026_Azerbaijan_GP_R"
 
 driver_state = {}
 

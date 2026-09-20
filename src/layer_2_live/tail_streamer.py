@@ -173,7 +173,7 @@ def main():
     parser = argparse.ArgumentParser(description="Tail F1 live data and stream to Cassandra")
     parser.add_argument("--from-start", action="store_true", help="Process from beginning of file")
     parser.add_argument("--replay", action="store_true", help="Slow down processing for offline dashboard testing")
-    parser.add_argument("--session", type=str, default="2026_Italian_GP_R", help="Session ID tag")
+    parser.add_argument("--session", type=str, default="2026_Azerbaijan_GP_R", help="Session ID tag")
     args = parser.parse_args()
     session_id = args.session
     print(f"Session ID: {session_id}")

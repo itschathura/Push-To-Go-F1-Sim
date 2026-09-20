@@ -5,7 +5,7 @@ import pandas as pd
 fastf1.Cache.enable_cache('data/cache')
 
 YEAR = 2026
-ROUNDS = range(1, 14)          # Round 1 - 13
+ROUNDS = range(1, 15)          # Round 1 - 14
 SESSION_TYPES = ['R', 'S']     # Race + Sprint
 
 
