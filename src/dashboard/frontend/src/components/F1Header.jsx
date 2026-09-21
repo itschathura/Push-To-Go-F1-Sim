@@ -8,7 +8,7 @@ export function F1Header({ data }) {
     || (data?.num_laps
       ? Math.max(...Object.values(data.num_laps).map(n => parseInt(n, 10) || 0), 1)
       : 42);
-  const totalLaps = data?.total_laps || 53;
+  const totalLaps = data?.total_laps || 51;
 
   const trackTemp = data?.weather?.track_temp;
   const rain = data?.weather?.rain;

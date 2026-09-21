@@ -13,13 +13,14 @@ export const TEAM_COLORS = {
 };
 
 export const DRIVER_TEAM = {
-  'VER': 'Red Bull Racing', 'LAW': 'Red Bull Racing',
+  'VER': 'Red Bull Racing', 'HAD': 'Red Bull Racing',
   'NOR': 'McLaren', 'PIA': 'McLaren',
   'LEC': 'Ferrari', 'HAM': 'Ferrari',
   'RUS': 'Mercedes', 'ANT': 'Mercedes',
   'ALO': 'Aston Martin', 'STR': 'Aston Martin',
   'GAS': 'Alpine', 'COL': 'Alpine',
-  'TSU': 'Racing Bulls', 'LIN': 'Racing Bulls',
+  'LAW': 'Racing Bulls', 'LIN': 'Racing Bulls',
+  'TSU': 'Racing Bulls',
   'ALB': 'Williams', 'SAI': 'Williams',
   'HUL': 'Audi', 'BOR': 'Audi',
   'OCO': 'Haas F1 Team', 'BEA': 'Haas F1 Team',
@@ -28,10 +29,10 @@ export const DRIVER_TEAM = {
 
 export const DRIVER_NUMBERS = {
   'VER': '1', 'NOR': '4', 'LEC': '16', 'RUS': '63', 'HAM': '44',
-  'PIA': '81', 'ANT': '12', 'BEA': '87', 'TSU': '22', 'COL': '43',
-  'LAW': '30', 'HUL': '27', 'GAS': '10', 'BOR': '5', 'ALB': '23',
-  'SAI': '55', 'OCO': '31', 'ALO': '14', 'PER': '11', 'BOT': '77',
-  'STR': '18', 'LIN': '41'
+  'PIA': '81', 'ANT': '12', 'BEA': '87', 'HAD': '6', 'TSU': '22',
+  'COL': '43', 'LAW': '30', 'HUL': '27', 'GAS': '10', 'BOR': '5',
+  'ALB': '23', 'SAI': '55', 'OCO': '31', 'ALO': '14', 'PER': '11',
+  'BOT': '77', 'STR': '18', 'LIN': '41'
 };
 
 export const DRIVER_FULL_NAMES = {
@@ -43,6 +44,7 @@ export const DRIVER_FULL_NAMES = {
   'PIA': 'Oscar PIASTRI',
   'ANT': 'Kimi ANTONELLI',
   'BEA': 'Oliver BEARMAN',
+  'HAD': 'Isack HADJAR',
   'TSU': 'Yuki TSUNODA',
   'COL': 'Franco COLAPINTO',
   'LAW': 'Liam LAWSON',
@@ -58,3 +60,4 @@ export const DRIVER_FULL_NAMES = {
   'STR': 'Lance STROLL',
   'LIN': 'Arvid LINDBLAD'
 };
+
