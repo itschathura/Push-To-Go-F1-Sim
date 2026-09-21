@@ -16,7 +16,7 @@ from src.ml_model import predict
 # ============================================================
 DRIVER_MAP = {
     '12': 'ANT', '44': 'HAM', '63': 'RUS', '16': 'LEC', '1': 'NOR',
-    '3': 'VER', '81': 'PIA', '30': 'LAW', '10': 'GAS',
+    '3': 'VER', '6': 'HAD', '81': 'PIA', '30': 'LAW', '10': 'GAS',
     '22': 'TSU', '43': 'COL', '87': 'BEA', '5': 'BOR', '55': 'SAI',
     '23': 'ALB', '31': 'OCO', '27': 'HUL', '14': 'ALO', '18': 'STR',
     '77': 'BOT', '11': 'PER', '41': 'LIN'
@@ -141,7 +141,7 @@ def process_driver(driver_no):
 
 client = RealF1Client(
     topics=["CarData.z", "Position.z", "TimingData"],
-    log_file_name="madrid_gp_live_backup.json"
+    log_file_name="azerbaijan_gp_live_backup.json"
 )
 
 

@@ -70,9 +70,9 @@ TEAM_COLORS = {
 }
 DRIVER_TEAM = {
     'RUS': 'Mercedes', 'ANT': 'Mercedes', 'NOR': 'McLaren', 'PIA': 'McLaren',
-    'LEC': 'Ferrari', 'HAM': 'Ferrari', 'VER': 'Red Bull Racing', 'LAW': 'Red Bull Racing',
+    'LEC': 'Ferrari', 'HAM': 'Ferrari', 'VER': 'Red Bull Racing', 'HAD': 'Red Bull Racing',
     'GAS': 'Alpine', 'COL': 'Alpine', 'BOR': 'Audi', 'HUL': 'Audi',
-    'TSU': 'Racing Bulls', 'LIN': 'Racing Bulls', 'BEA': 'Haas F1 Team', 'OCO': 'Haas F1 Team',
+    'LAW': 'Racing Bulls', 'LIN': 'Racing Bulls', 'TSU': 'Racing Bulls', 'BEA': 'Haas F1 Team', 'OCO': 'Haas F1 Team',
     'STR': 'Aston Martin', 'ALO': 'Aston Martin', 'ALB': 'Williams', 'SAI': 'Williams',
     'BOT': 'Cadillac', 'PER': 'Cadillac'
 }

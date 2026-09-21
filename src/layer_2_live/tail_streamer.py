@@ -23,7 +23,7 @@ class DockerLocalTranslator(AddressTranslator):
 
 DRIVER_MAP = {
     '12': 'ANT', '44': 'HAM', '63': 'RUS', '16': 'LEC', '1': 'NOR',
-    '3': 'VER', '81': 'PIA', '30': 'LAW', '10': 'GAS',
+    '3': 'VER', '6': 'HAD', '81': 'PIA', '30': 'LAW', '10': 'GAS',
     '22': 'TSU', '43': 'COL', '87': 'BEA', '5': 'BOR', '55': 'SAI',
     '23': 'ALB', '31': 'OCO', '27': 'HUL', '14': 'ALO', '18': 'STR',
     '77': 'BOT', '11': 'PER', '41': 'LIN'
@@ -48,7 +48,7 @@ live_extra = {
     "gaps_to_leader": {},
     "gaps_to_ahead": {},
     "current_lap": 1,
-    "total_laps": 53,
+    "total_laps": 51,
     "car_data_received": False,
     "last_update": "",
     "records_processed": 0
