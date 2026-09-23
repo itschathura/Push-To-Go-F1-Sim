@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Research Methodology — Proposal Presentation | CSH4216</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --f1-red: #e10600;
+      --f1-red-dark: #b80500;
+      --bg: #f8f9fa;
+      --surface: #ffffff;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
+      --shadow-md: 0 8px 24px rgba(0,0,0,0.06);
+      --card-radius: 14px;
+      --tag-bg: #f3f4f6;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: #0f1115;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .wrapper {
+      transform-origin: center;
+    }
+
+    /* 16:9 Presentation Canvas */
+    .slide {
+      width: 1920px;
+      height: 1080px;
+      background: var(--bg);
+      position: relative;
+      overflow: hidden;
+      padding: 60px 80px 48px 80px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+    }
+
+    /* Top Red Accent */
+    .top-bar {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 6px;
+      background: var(--f1-red);
+    }
+
+    /* Header Section */
+    .slide-header {
+      margin-bottom: 28px;
+    }
+
+    .slide-title {
+      font-size: 46px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text-main);
+      line-height: 1.15;
+    }
+
+    .slide-subtitle {
+      font-size: 20px;
+      color: var(--text-muted);
+      font-weight: 500;
+      margin-top: 6px;
+    }
+
+    /* 4-Phase Grid Layout */
+    .methodology-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 22px;
+      margin-bottom: 22px;
+      flex: 1;
+    }
+
+    .phase-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--card-radius);
+      padding: 24px 22px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .phase-card:hover {
+      box-shadow: var(--shadow-md);
+      border-color: #cbd5e1;
+      transform: translateY(-2px);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .step-number {
+      width: 36px;
+      height: 36px;
+      background: var(--f1-red);
+      color: #fff;
+      font-size: 16px;
+      font-weight: 800;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .phase-heading {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1.25;
+    }
+
+    .phase-tag {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--f1-red);
+      margin-bottom: 2px;
+    }
+
+    .bullet-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+      font-size: 14.5px;
+      line-height: 1.45;
+      color: #374151;
+      flex: 1;
+    }
+
+    .bullet-list li {
+      position: relative;
+      padding-left: 18px;
+    }
+
+    .bullet-list li::before {
+      content: "•";
+      position: absolute;
+      left: 2px;
+      top: -1px;
+      color: var(--f1-red);
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .formula-box {
+      margin-top: 12px;
+      background: #fff8f8;
+      border: 1px dashed rgba(225,6,0,0.35);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 13px;
+      color: #991b1b;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .tech-pill-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid #f1f5f9;
+    }
+
+    .tech-pill {
+      font-size: 11.5px;
+      font-weight: 600;
+      background: var(--tag-bg);
+      color: #4b5563;
+      padding: 4px 9px;
+      border-radius: 6px;
+      border: 1px solid #e5e7eb;
+    }
+
+    /* Bottom Highlight Banner (Matches Slide 6, 9 & 15 style) */
+    .validation-banner {
+      background: #111827;
+      color: #ffffff;
+      border-radius: 12px;
+      padding: 18px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+    }
+
+    .banner-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .badge-core {
+      background: var(--f1-red);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      padding: 6px 12px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .banner-text {
+      font-size: 15px;
+      line-height: 1.45;
+      color: #e5e7eb;
+    }
+
+    .banner-text strong {
+      color: #38bdf8;
+    }
+
+    .banner-pills {
+      display: flex;
+      gap: 10px;
+    }
+
+    .validation-tag {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #f3f4f6;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+
+    .dot-accent {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #38bdf8;
+    }
+
+    /* Footer */
+    .slide-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 18px;
+      padding-top: 10px;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .footer-left {
+      color: #4b5563;
+    }
+
+    .footer-right {
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper" id="wrapper">
+    <div class="slide" id="slide">
+      <div class="top-bar"></div>
+
+      <!-- Slide Header -->
+      <div class="slide-header">
+        <h1 class="slide-title">Research Methodology</h1>
+        <p class="slide-subtitle">Four-stage pipeline connecting physics-informed battery estimation with machine learning</p>
+      </div>
+
+      <!-- Methodology 4-Card Grid -->
+      <div class="methodology-grid">
+        
+        <!-- Phase 1 -->
+        <div class="phase-card">
+          <div class="phase-tag">Stage 1</div>
+          <div class="card-top">
+            <div class="step-number">1</div>
+            <h2 class="phase-heading">Data Ingestion &amp; Preprocessing</h2>
+          </div>
+          <ul class="bullet-list">
+            <li><strong>FastF1 &amp; OpenF1 APIs:</strong> Synchronised ~3.7 Hz telemetry feed across 12+ Grand Prix sessions.</li>
+            <li><strong>Channel Filtering:</strong> Speed, Throttle, Brake pressure, Engine RPM, Gear, Car coordinates.</li>
+            <li><strong>Event Annotation:</strong> Ground truth overtake tagging derived from official lap position change matrices.</li>
+          </ul>
+          <div class="tech-pill-container">
+            <span class="tech-pill">FastF1</span>
+            <span class="tech-pill">OpenF1</span>
+            <span class="tech-pill">~3.7 Hz Telemetry</span>
+          </div>
+        </div>
+
+        <!-- Phase 2 -->
+        <div class="phase-card" style="border-top: 3px solid var(--f1-red);">
+          <div class="phase-tag">Stage 2 · Novel Step</div>
+          <div class="card-top">
+            <div class="step-number">2</div>
+            <h2 class="phase-heading">Physics-Informed SoC Estimation</h2>
+          </div>
+          <ul class="bullet-list">
+            <li><strong>2026 PU Energy Balance:</strong> Integrates power flow based on FIA regulatory constraints.</li>
+            <li><strong>Depletion Modeling:</strong> 350 kW MGU-K at 100% throttle = <strong>8.75% / sec</strong> drain of 4 MJ capacity.</li>
+            <li><strong>Regen Approximation:</strong> Kinetic recovery integration during brake events &amp; super-clipping.</li>
+          </ul>
+          <div class="formula-box">
+            SoC(t) = SoC(0) + &int; (P_regen - P_deploy) dt / E_battery
+          </div>
+          <div class="tech-pill-container">
+            <span class="tech-pill">First Principles</span>
+            <span class="tech-pill">FIA 2026 Rules</span>
+          </div>
+        </div>
+
+        <!-- Phase 3 -->
+        <div class="phase-card">
+          <div class="phase-tag">Stage 3</div>
+          <div class="card-top">
+            <div class="step-number">3</div>
+            <h2 class="phase-heading">Feature Engineering &amp; ML Classifier</h2>
+          </div>
+          <ul class="bullet-list">
+            <li><strong>Relative Battle Dynamics:</strong> &Delta;SoC (chaser vs leader), gap-to-ahead, speed differential, longitudinal acceleration.</li>
+            <li><strong>Strategic Context:</strong> Tyre compound delta &amp; relative tyre age (stint wear).</li>
+            <li><strong>XGBoost Model:</strong> Extreme Gradient Boosting binary classifier tuned for class-imbalanced overtake intervals.</li>
+          </ul>
+          <div class="tech-pill-container">
+            <span class="tech-pill">XGBoost</span>
+            <span class="tech-pill">Scikit-learn</span>
+            <span class="tech-pill">SMOTE / Weights</span>
+          </div>
+        </div>
+
+        <!-- Phase 4 -->
+        <div class="phase-card">
+          <div class="phase-tag">Stage 4</div>
+          <div class="card-top">
+            <div class="step-number">4</div>
+            <h2 class="phase-heading">Two-Layer System Architecture</h2>
+          </div>
+          <ul class="bullet-list">
+            <li><strong>Layer 1 (Offline Batch):</strong> Historical model training, feature importance extraction &amp; artifact persistence.</li>
+            <li><strong>Layer 2 (Live-Style Stream):</strong> High-throughput ingestion, real-time feature engine &amp; ScyllaDB low-latency store.</li>
+            <li><strong>Inference Serving:</strong> Sub-50ms overtake probability broadcasted to real-time UI.</li>
+          </ul>
+          <div class="tech-pill-container">
+            <span class="tech-pill">ScyllaDB</span>
+            <span class="tech-pill">FastAPI</span>
+            <span class="tech-pill">React / Streamlit</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Viva Defense Banner: Validation Strategy -->
+      <div class="validation-banner">
+        <div class="banner-left">
+          <div class="badge-core">Evaluation Strategy</div>
+          <div class="banner-text">
+            <strong>Indirect Validation of Proprietary Battery:</strong> Since team telemetry is secret, SoC validity is established through 
+            <strong>Ablation Benchmarking</strong> (&Delta;AUC / F1 with vs without SoC) and <strong>SHAP Explanations</strong> to confirm physics alignment.
+          </div>
+        </div>
+        <div class="banner-pills">
+          <div class="validation-tag">
+            <div class="dot-accent"></div>
+            Ablation Study (&Delta;AUC)
+          </div>
+          <div class="validation-tag">
+            <div class="dot-accent" style="background: #a855f7;"></div>
+            SHAP Interpretability
+          </div>
+          <div class="validation-tag">
+            <div class="dot-accent" style="background: #22c55e;"></div>
+            Stratified Time-Series CV
+          </div>
+        </div>
+      </div>
+
+      <!-- Slide Footer (Matching CSH4216 Theme) -->
+      <div class="slide-footer">
+        <div class="footer-left">Inferring SoC &amp; predicting overtakes | CSH4216</div>
+        <div class="footer-right">Methodology Overview</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function scaleSlide() {
+      const wrapper = document.getElementById('wrapper');
+      const W = 1920, H = 1080;
+      const scale = Math.min(window.innerWidth / W, window.innerHeight / H);
+      wrapper.style.width = W + 'px';
+      wrapper.style.height = H + 'px';
+      wrapper.style.transform = `scale(${scale})`;
+    }
+    scaleSlide();
+    window.addEventListener('resize', scaleSlide);
+  </script>
+</body>
+</html>

@@ -6,10 +6,21 @@ import sys
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 from src.common import cassandra_compat
 from cassandra.cluster import Cluster
+from cassandra.io.asyncioreactor import AsyncioConnection
+from cassandra.policies import AddressTranslator
+
+class DockerLocalTranslator(AddressTranslator):
+    def translate(self, addr):
+        return '127.0.0.1'
 
 def monitor_live_telemetry(limit=5, refresh_rate=2):
     # 1. Connect to ScyllaDB
-    cluster = Cluster(['127.0.0.1'], port=9042)
+    cluster = Cluster(
+        ['127.0.0.1'],
+        port=9042,
+        address_translator=DockerLocalTranslator(),
+        connection_class=AsyncioConnection
+    )
     session = cluster.connect('f1_live')
     
     query = f"""
