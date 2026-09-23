@@ -3,6 +3,9 @@ import time
 import os
 import sys
 
+if sys.platform == 'win32' and hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 from src.common import cassandra_compat
 from cassandra.cluster import Cluster
