@@ -23,23 +23,24 @@ MGU_K_POWER_KW = 350.0
 BASE_RATE_PER_SECOND = (MGU_K_POWER_KW / BATTERY_CAPACITY_KJ) * 100  # = 8.75 %/s
 
 
+"******************************************"
 def calculate_estimated_soc(
     throttle: float,
     brake: float,
     acceleration: float,
-    previous_soc: float,
-    delta_time: float,
+    previous_soc: float,  
+    delta_time: float, 
     drs_active: int = 0,
 ) -> float:
     """
     Simulates 2026 F1 Power Unit 350 kW MGU-K Battery State of Charge (SoC).
     
     Energy Recovery Sources (2026 Regulations):
-    1. 🛑 Braking: Kinetic energy converted by MGU-K into electrical energy
-    2. 🚗 Lift-Off / Coasting: Kinetic recovery during lift-and-coast before braking zones
-    3. ⚡ Part-Throttle: ICE torque diverted via MGU-K to recharge while cornering
-    4. 🏎️ Super Clipping: High-speed straight line where ICE surplus power recharges battery
-    5. 🚀 Deployment: Full throttle acceleration deploying up to 350 kW to rear wheels
+    1. Braking: Kinetic energy converted by MGU-K into electrical energy
+    2. Lift-Off / Coasting: Kinetic recovery during lift-and-coast before braking zones
+    3. Part-Throttle: ICE torque diverted via MGU-K to recharge while cornering
+    4. Super Clipping: High-speed straight line where ICE surplus power recharges battery
+    5. Deployment: Full throttle acceleration deploying up to 350 kW to rear wheels
     """
     if delta_time <= 0 or delta_time > 2.0:
         return previous_soc
@@ -94,4 +95,4 @@ def calculate_available_mguk_power(soc: float, is_overtake_zone: bool = True) ->
         return 120.0 + ratio * (max_zone_power - 120.0)
     else:
         # Low energy reserve: power output is restricted to protect cell voltage
-        return max(0.0, (soc / 15.0) * 120.0)
+        return max(0.0, (soc / 15.0) * 120.0)
