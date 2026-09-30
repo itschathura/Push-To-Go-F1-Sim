@@ -1,0 +1,64 @@
+================================================================================
+  Push to Go — F1 Data Download & Processing Guide
+  Commands for Windows PowerShell
+================================================================================
+
+STEP 0: Activate Python Virtual Environment
+--------------------------------------------
+  .venv\Scripts\Activate
+
+  (You should see (.venv) appear in your terminal prompt)
+
+
+STEP 1: Fetch Laps Data (fetch_historical_data.py)
+---------------------------------------------------
+  Downloads lap-level data (position, compound, tyre life, track status)
+  for all completed races in the season. Skips already-downloaded rounds.
+
+  $env:PYTHONIOENCODING='utf-8'; python src/layer_1_training/fetch_historical_data.py
+
+  Output files: data/raw/f1_2026_R{N}_R_raw_laps.csv
+                data/raw/f1_2026_R{N}_S_raw_laps.csv  (sprint weekends only)
+
+
+STEP 2: Fetch Telemetry Data (fetch_telemetry.py)
+--------------------------------------------------
+  Downloads per-driver telemetry (speed, throttle, brake, DRS, RPM, etc.)
+  for all rounds. Skips already-downloaded rounds.
+  NOTE: Each telemetry file is ~150-240 MB. This step takes several minutes.
+
+  $env:PYTHONIOENCODING='utf-8'; python src/layer_1_training/fetch_telemetry.py
+
+  Output files: data/raw/f1_2026_R{N}_R_raw_telemetry.csv
+                data/raw/f1_2026_R{N}_S_raw_telemetry.csv  (sprint weekends only)
+
+
+STEP 3: Build Training CSV (build_training_csv.py)
+---------------------------------------------------
+  Processes all raw data: merges laps + telemetry, computes features
+  (acceleration, estimated SoC, gap to car ahead, tyre compound encoding),
+  filters out safety car / VSC periods, and generates overtake success labels.
+
+  $env:PYTHONIOENCODING='utf-8'; python src/layer_1_training/build_training_csv.py
+
+  Output file: data/processed/f1_2026_training_layer1.csv
+
+
+================================================================================
+  NOTES
+================================================================================
+
+- $env:PYTHONIOENCODING='utf-8' is needed to avoid Unicode errors with 
+  emoji characters in the scripts on Windows (cp1252 encoding issue).
+
+- To add a NEW round (e.g. after a race weekend), just run Steps 1-3 again.
+  Steps 1 & 2 automatically skip already-downloaded rounds.
+
+- Config file: src/common/config.py
+  Change ROUNDS = range(1, N) to include new rounds.
+
+- FastF1 caches downloaded API data in data/cache/ so re-runs are faster.
+
+- Step 3 is CPU-heavy (processes ~10M+ rows). Expect 3-5 minutes.
+
+================================================================================
