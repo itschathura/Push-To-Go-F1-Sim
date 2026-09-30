@@ -47,27 +47,27 @@ def calculate_estimated_soc(
 
     current_soc = previous_soc
 
-    # 1. 🛑 BRAKING: Primary kinetic energy harvesting via MGU-K
+    # 1. BRAKING: Primary kinetic energy harvesting via MGU-K
     if brake > 0:
         current_soc = min(100.0, current_soc + (BASE_RATE_PER_SECOND * delta_time))
 
-    # 2. 🚗 LIFT-OFF / COASTING: Zero/minimal throttle without brake pedal
+    # 2. LIFT-OFF / COASTING: Zero/minimal throttle without brake pedal
     elif throttle < 10.0:
         # Kinetic harvesting during lift-and-coast phase before braking
         current_soc = min(100.0, current_soc + (BASE_RATE_PER_SECOND * 0.55 * delta_time))
 
-    # 3. ⚡ PART-THROTTLE HARVESTING: Cornering & traction modulation
+    # 3. PART-THROTTLE HARVESTING: Cornering & traction modulation
     elif throttle < 80.0:
         # ICE produces surplus torque beyond tire traction limit; MGU-K harvests it
         harvest_ratio = ((80.0 - throttle) / 80.0) * 0.40
         current_soc = min(100.0, current_soc + (BASE_RATE_PER_SECOND * harvest_ratio * delta_time))
 
-    # 4. 🏎️ SUPER CLIPPING: Full throttle at high speed, drag-limited acceleration
+    # 4. SUPER CLIPPING: Full throttle at high speed, drag-limited acceleration
     elif throttle >= 80.0 and acceleration <= 0.8:
         # End of straights: car is near V-max. ICE surplus power is diverted directly to battery
         current_soc = min(100.0, current_soc + (BASE_RATE_PER_SECOND * 0.65 * delta_time))
 
-    # 5. 🚀 DEPLOYMENT: Full throttle with positive acceleration
+    # 5. DEPLOYMENT: Full throttle with positive acceleration
     elif throttle >= 80.0 and acceleration > 0.8:
         # Full electrical power deployment (up to 350 kW / 469 hp)
         deploy_multiplier = 1.0 if drs_active else 0.75
