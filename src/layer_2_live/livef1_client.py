@@ -22,8 +22,8 @@ DRIVER_MAP = {
     '77': 'BOT', '11': 'PER', '41': 'LIN'
 }
 
-# ⚠️ Updated for Azerbaijan GP
-SESSION_ID = "2026_Azerbaijan_GP_R"
+# ⚠️ Updated for Bahrain GP
+SESSION_ID = "2026_Bahrain_GP_R"
 
 driver_state = {}
 
@@ -141,7 +141,7 @@ def process_driver(driver_no):
 
 client = RealF1Client(
     topics=["CarData.z", "Position.z", "TimingData"],
-    log_file_name="azerbaijan_gp_live_backup.json"
+    log_file_name="bahrain_gp_live_backup.json"
 )
 
 
