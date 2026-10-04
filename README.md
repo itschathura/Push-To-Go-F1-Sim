@@ -128,7 +128,7 @@ The project ingests historical and live data from the 2026 Formula 1 championshi
 | **R13** | Italian Grand Prix | Monza, Italy | 2026-09-06 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
 | **R14** | Spanish Grand Prix | Madrid, Spain | 2026-09-13 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
 | **R15** | Azerbaijan Grand Prix | Baku, Azerbaijan | 2026-09-26 | Conventional | ✅ Saved | ⏳ Processing | — | Laps Ingested |
-| **R16** | Bahrain Grand Prix | Sakhir, Bahrain | 2026-10-04 | Conventional | 🔴 Live / Active | 🔴 Live / Active | — | Current Target |
+| **R16** | Bahrain Grand Prix | Sakhir, Bahrain | 2026-10-04 | Conventional | 🔴 Live / Active | 🔴 Live / Active | — | Current Target | - underway
 
 > **Data Pipeline Note:** Telemetry and lap timing files are downloaded via FastF1 into `data/raw/` and processed into `data/processed/f1_2026_training_layer1.csv` for machine learning feature extraction and model training.
 
