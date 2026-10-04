@@ -107,9 +107,37 @@ python src/layer_2_live/tail_streamer.py --session "2026_Madrid_GP_R"
 
 ---
 
+## 🏁 2026 Season Grand Prix Coverage (Rounds 1–16)
+
+The project ingests historical and live data from the 2026 Formula 1 championship. Below is the complete status of all Grand Prix rounds held up to the current race weekend (**Round 16: Bahrain Grand Prix**):
+
+| Round | Grand Prix | Circuit / Location | Event Date | Format | Raw Laps | Raw Telemetry | Sprint Data | Status |
+|:-----:|:-----------|:-------------------|:----------:|:------:|:--------:|:-------------:|:-----------:|:------:|
+| **R01** | Australian Grand Prix | Melbourne, Australia | 2026-03-08 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
+| **R02** | Chinese Grand Prix | Shanghai, China | 2026-03-15 | Sprint | ✅ Saved | ✅ Saved | ✅ Saved | Ingested |
+| **R03** | Japanese Grand Prix | Suzuka, Japan | 2026-03-29 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
+| **R04** | Miami Grand Prix | Miami Gardens, United States | 2026-05-03 | Sprint | ✅ Saved | ✅ Saved | ✅ Saved | Ingested |
+| **R05** | Canadian Grand Prix | Montréal, Canada | 2026-05-24 | Sprint | ✅ Saved | ✅ Saved | ✅ Saved | Ingested |
+| **R06** | Monaco Grand Prix | Monte Carlo, Monaco | 2026-06-07 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
+| **R07** | Barcelona Grand Prix | Barcelona, Spain | 2026-06-14 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
+| **R08** | Austrian Grand Prix | Spielberg, Austria | 2026-06-28 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
+| **R09** | British Grand Prix | Silverstone, United Kingdom | 2026-07-05 | Sprint | ✅ Saved | ✅ Saved | ✅ Saved | Ingested |
+| **R10** | Belgian Grand Prix | Spa-Francorchamps, Belgium | 2026-07-19 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
+| **R11** | Hungarian Grand Prix | Budapest, Hungary | 2026-07-26 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
+| **R12** | Dutch Grand Prix | Zandvoort, Netherlands | 2026-08-23 | Sprint | ✅ Saved | ✅ Saved | ✅ Saved | Ingested |
+| **R13** | Italian Grand Prix | Monza, Italy | 2026-09-06 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
+| **R14** | Spanish Grand Prix | Madrid, Spain | 2026-09-13 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
+| **R15** | Azerbaijan Grand Prix | Baku, Azerbaijan | 2026-09-26 | Conventional | ✅ Saved | ⏳ Processing | — | Laps Ingested |
+| **R16** | Bahrain Grand Prix | Sakhir, Bahrain | 2026-10-04 | Conventional | 🔴 Live / Active | 🔴 Live / Active | — | Current Target |
+
+> **Data Pipeline Note:** Telemetry and lap timing files are downloaded via FastF1 into `data/raw/` and processed into `data/processed/f1_2026_training_layer1.csv` for machine learning feature extraction and model training.
+
+---
+
 ## ML Model
 
 - **Algorithm:** XGBoost (binary classification)
-- **Features:** Speed, Throttle, Brake, RPM, Acceleration, Estimated SoC, Gap to Ahead
+- **Features:** Speed, Throttle, Brake, RPM, Acceleration, Estimated SoC, Gap to Ahead, TyreLife, Compound_Encoded
 - **Label:** Overtake likely (1) / not likely (0)
-- **Training data:** 2026 FastF1 race telemetry (Rounds 1–13)
+- **Training data:** 2026 FastF1 race telemetry (Rounds 1–14/15, 10M+ rows processed)
+
