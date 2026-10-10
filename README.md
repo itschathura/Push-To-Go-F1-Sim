@@ -109,7 +109,7 @@ python src/layer_2_live/tail_streamer.py --session "2026_Madrid_GP_R"
 
 ## 🏁 2026 Season Grand Prix Coverage (Rounds 1–16)
 
-The project ingests historical and live data from the 2026 Formula 1 championship. Below is the complete status of all Grand Prix rounds held up to the current race weekend (**Round 16: Bahrain Grand Prix**):
+The project ingests historical and live data from the 2026 Formula 1 championship. Below is the complete status of all Grand Prix rounds held up to the current race weekend (**Round 17: Singapore Grand Prix**):
 
 | Round | Grand Prix | Circuit / Location | Event Date | Format | Raw Laps | Raw Telemetry | Sprint Data | Status |
 |:-----:|:-----------|:-------------------|:----------:|:------:|:--------:|:-------------:|:-----------:|:------:|
@@ -128,7 +128,8 @@ The project ingests historical and live data from the 2026 Formula 1 championshi
 | **R13** | Italian Grand Prix | Monza, Italy | 2026-09-06 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
 | **R14** | Spanish Grand Prix | Madrid, Spain | 2026-09-13 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
 | **R15** | Azerbaijan Grand Prix | Baku, Azerbaijan | 2026-09-26 | Conventional | ✅ Saved | ⏳ Processing | — | Laps Ingested |
-| **R16** | Bahrain Grand Prix | Sakhir, Bahrain | 2026-10-04 | Conventional | 🔴 Live / Active | 🔴 Live / Active | — | Current Target | - underway
+| **R16** | Bahrain Grand Prix | Sakhir, Bahrain | 2026-10-04 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
+| **R17** | Singapore Grand Prix | Marina Bay, Singapore | 2026-10-10 | Conventional | 🔴 Live / Active | 🔴 Live / Active | — | Current Target | - underway
 
 > **Data Pipeline Note:** Telemetry and lap timing files are downloaded via FastF1 into `data/raw/` and processed into `data/processed/f1_2026_training_layer1.csv` for machine learning feature extraction and model training.
 
