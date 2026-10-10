@@ -107,7 +107,7 @@ python src/layer_2_live/tail_streamer.py --session "2026_Madrid_GP_R"
 
 ---
 
-## 🏁 2026 Season Grand Prix Coverage (Rounds 1–16)
+## 🏁 2026 Season Grand Prix Coverage (Rounds 1–17)
 
 The project ingests historical and live data from the 2026 Formula 1 championship. Below is the complete status of all Grand Prix rounds held up to the current race weekend (**Round 17: Singapore Grand Prix**):
 
