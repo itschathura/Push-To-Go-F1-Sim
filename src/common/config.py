@@ -1,6 +1,6 @@
 # --- FastF1 Season Settings ---
 YEAR = 2026
-ROUNDS = range(1, 17)  # Include Bahrain (Round 16)
+ROUNDS = range(1, 18)  # Include Singapore (Round 17)
 SESSION_TYPE = "R"
 
 # --- Cache Path ---

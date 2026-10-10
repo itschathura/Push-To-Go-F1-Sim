@@ -22,8 +22,8 @@ DRIVER_MAP = {
     '77': 'BOT', '11': 'PER', '41': 'LIN'
 }
 
-# ⚠️ Updated for Bahrain GP
-SESSION_ID = "2026_Bahrain_GP_R"
+# ⚠️ Updated for Singapore GP
+SESSION_ID = "2026_Singapore_GP_Q"
 
 driver_state = {}
 
