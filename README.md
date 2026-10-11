@@ -130,7 +130,7 @@ The project ingests historical and live data from the 2026 Formula 1 championshi
 | **R15** | Azerbaijan Grand Prix | Baku, Azerbaijan | 2026-09-26 | Conventional | ✅ Saved | ⏳ Processing | — | Laps Ingested |
 | **R16** | Bahrain Grand Prix | Sakhir, Bahrain | 2026-10-04 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
 | **R17** | Singapore Grand Prix | Marina Bay, Singapore | 2026-10-11 | Conventional | 🏁 Concluded | 🏁 Concluded | — | Concluded (Pending Ingestion) |
-| **R18** | United States Grand Prix | Austin, United States | 2026-10-25 | Conventional | ⏳ Upcoming | ⏳ Upcoming | — | Next Target |
+| **R18** | United States Grand Prix | Austin, United States | 2026-10-25 | Conventional | ⏳ Upcoming | ⏳ Upcoming | — | Next Target | (#REMEMBER : need to train sgp gp)
 
 > **Data Pipeline Note:** Telemetry and lap timing files are downloaded via FastF1 into `data/raw/` and processed into `data/processed/f1_2026_training_layer1.csv` for machine learning feature extraction and model training.
 
