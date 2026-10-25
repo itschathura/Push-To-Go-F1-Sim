@@ -109,7 +109,7 @@ python src/layer_2_live/tail_streamer.py --session "2026_Madrid_GP_R"
 
 ## 🏁 2026 Season Grand Prix Coverage (Rounds 1–18)
 
-The project ingests historical and live data from the 2026 Formula 1 championship. Below is the complete status of all Grand Prix rounds held up to the concluded **Round 17: Singapore Grand Prix** and upcoming target (**Round 18: United States Grand Prix**):
+The project ingests historical and live data from the 2026 Formula 1 championship. Below is the complete status of all Grand Prix rounds held up to the concluded **Round 18: United States Grand Prix**:
 
 | Round | Grand Prix | Circuit / Location | Event Date | Format | Raw Laps | Raw Telemetry | Sprint Data | Status |
 |:-----:|:-----------|:-------------------|:----------:|:------:|:--------:|:-------------:|:-----------:|:------:|
@@ -129,8 +129,8 @@ The project ingests historical and live data from the 2026 Formula 1 championshi
 | **R14** | Spanish Grand Prix | Madrid, Spain | 2026-09-13 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
 | **R15** | Azerbaijan Grand Prix | Baku, Azerbaijan | 2026-09-26 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
 | **R16** | Bahrain Grand Prix | Sakhir, Bahrain | 2026-10-04 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
-| **R17** | Singapore Grand Prix | Marina Bay, Singapore | 2026-10-11 | Conventional | 🏁 Concluded | 🏁 Concluded | — | Concluded (Pending Ingestion) |
-| **R18** | United States Grand Prix | Austin, United States | 2026-10-25 | Conventional | ⏳ Upcoming | ⏳ Upcoming | — | Next Target | (#REMEMBER : need to train sgp gp)
+| **R17** | Singapore Grand Prix | Marina Bay, Singapore | 2026-10-11 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
+| **R18** | United States Grand Prix | Austin, United States | 2026-10-25 | Conventional | 🏁 Concluded | 🏁 Concluded | — | Concluded |
 
 > **Data Pipeline Note:** Telemetry and lap timing files are downloaded via FastF1 into `data/raw/` and processed into `data/processed/f1_2026_training_layer1.csv` for machine learning feature extraction and model training.
 
