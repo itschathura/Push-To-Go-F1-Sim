@@ -128,9 +128,9 @@ The project ingests historical and live data from the 2026 Formula 1 championshi
 | **R13** | Italian Grand Prix | Monza, Italy | 2026-09-06 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
 | **R14** | Spanish Grand Prix | Madrid, Spain | 2026-09-13 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
 | **R15** | Azerbaijan Grand Prix | Baku, Azerbaijan | 2026-09-26 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
-| **R16** | Bahrain Grand Prix | Sakhir, Bahrain | 2026-10-04 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
-| **R17** | Singapore Grand Prix | Marina Bay, Singapore | 2026-10-11 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
-| **R18** | United States Grand Prix | Austin, United States | 2026-10-25 | Conventional | 🏁 Concluded | 🏁 Concluded | — | Concluded |
+| **R16** | Bahrain Grand Prix | Sakhir, Bahrain | 2026-10-04 | Conventional | ⚠️ API 403 | ⚠️ API 403 | — | Blocked (FastF1 API unavailable) |
+| **R17** | Singapore Grand Prix | Marina Bay, Singapore | 2026-10-11 | Sprint | ⚠️ API 403 | ⚠️ API 403 | ⚠️ API 403 | Blocked (FastF1 API unavailable) |
+| **R18** | United States Grand Prix | Austin, United States | 2026-10-25 | Conventional | 🏁 Concluded | 🏁 Concluded | — | Concluded (Pending API release) |
 
 > **Data Pipeline Note:** Telemetry and lap timing files are downloaded via FastF1 into `data/raw/` and processed into `data/processed/f1_2026_training_layer1.csv` for machine learning feature extraction and model training.
 
@@ -141,5 +141,5 @@ The project ingests historical and live data from the 2026 Formula 1 championshi
 - **Algorithm:** XGBoost (binary classification)
 - **Features:** Speed, Throttle, Brake, RPM, Acceleration, Estimated SoC, Gap to Ahead, TyreLife, Compound_Encoded
 - **Label:** Overtake likely (1) / not likely (0)
-- **Training data:** 2026 FastF1 race telemetry (Rounds 1–15, 11.1M+ rows processed)
+- **Training data:** 2026 FastF1 race telemetry (Rounds 1–15, 11.1M+ rows processed). Rounds 16–17 blocked by FastF1 API (HTTP 403/404 — data not yet published upstream).
 
