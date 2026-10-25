@@ -127,7 +127,7 @@ The project ingests historical and live data from the 2026 Formula 1 championshi
 | **R12** | Dutch Grand Prix | Zandvoort, Netherlands | 2026-08-23 | Sprint | ✅ Saved | ✅ Saved | ✅ Saved | Ingested |
 | **R13** | Italian Grand Prix | Monza, Italy | 2026-09-06 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
 | **R14** | Spanish Grand Prix | Madrid, Spain | 2026-09-13 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
-| **R15** | Azerbaijan Grand Prix | Baku, Azerbaijan | 2026-09-26 | Conventional | ✅ Saved | ⏳ Processing | — | Laps Ingested |
+| **R15** | Azerbaijan Grand Prix | Baku, Azerbaijan | 2026-09-26 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
 | **R16** | Bahrain Grand Prix | Sakhir, Bahrain | 2026-10-04 | Conventional | ✅ Saved | ✅ Saved | — | Ingested |
 | **R17** | Singapore Grand Prix | Marina Bay, Singapore | 2026-10-11 | Conventional | 🏁 Concluded | 🏁 Concluded | — | Concluded (Pending Ingestion) |
 | **R18** | United States Grand Prix | Austin, United States | 2026-10-25 | Conventional | ⏳ Upcoming | ⏳ Upcoming | — | Next Target | (#REMEMBER : need to train sgp gp)
@@ -141,5 +141,5 @@ The project ingests historical and live data from the 2026 Formula 1 championshi
 - **Algorithm:** XGBoost (binary classification)
 - **Features:** Speed, Throttle, Brake, RPM, Acceleration, Estimated SoC, Gap to Ahead, TyreLife, Compound_Encoded
 - **Label:** Overtake likely (1) / not likely (0)
-- **Training data:** 2026 FastF1 race telemetry (Rounds 1–14/15, 10M+ rows processed)
+- **Training data:** 2026 FastF1 race telemetry (Rounds 1–15, 11.1M+ rows processed)
 

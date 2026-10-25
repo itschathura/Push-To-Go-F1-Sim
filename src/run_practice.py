@@ -34,9 +34,9 @@ def main():
         print("Waiting for SignalR stream connection...")
         time.sleep(5)
 
-        print("Starting Tail Streamer (live tail mode - Singapore GP Qualifying)...")
+        print("Starting Tail Streamer (live tail mode - US GP Race)...")
         # NOTE: No --from-start here. We tail ONLY new live data the recorder appends.
-        proc_streamer = subprocess.Popen([python_exec, streamer_script, "--session", "2026_Singapore_GP_Q"])
+        proc_streamer = subprocess.Popen([python_exec, streamer_script, "--session", "2026_US_GP_R"])
         processes.append(proc_streamer)
 
         print("[OK] All services started successfully!")

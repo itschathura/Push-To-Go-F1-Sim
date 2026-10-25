@@ -9,8 +9,8 @@ from src.common.soc_calculator import calculate_estimated_soc
 from src.common.feature_engineering import calculate_acceleration, encode_compound
 from src.common import config
 
-# Process all rounds from 1 to 15 | including Azerbaijan GP
-ROUNDS = range(1, 15)  
+# Process all configured rounds up to US GP (Rounds 1-17)
+ROUNDS = config.ROUNDS
 SESSION_TYPE = "R"   # Sprint (S) skipped - only Race data used for training
 
 #- 5 second done.

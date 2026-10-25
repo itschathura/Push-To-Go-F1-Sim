@@ -1,11 +1,16 @@
 import os
+import sys
+from pathlib import Path
 import fastf1
 import pandas as pd
 
+project_root = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(project_root))
+
 fastf1.Cache.enable_cache('data/cache')
 
-YEAR = 2026
-ROUNDS = range(1, 15)          # Round 1 - 14
+from src.common.config import ROUNDS, YEAR, SESSION_TYPE
+
 SESSION_TYPES = ['R', 'S']     # Race + Sprint
 
 
@@ -18,8 +23,9 @@ def fetch_telemetry_for_session(round_num, session_type):
     try:
         session = fastf1.get_session(YEAR, round_num, session_type)
         session.load(telemetry=True, laps=True, weather=False)
+        laps = session.laps
     except Exception as e:
-        print(f"[-] Round {round_num} ({session_type}) -NO session or No load : {e}")
+        print(f"[-] Round {round_num} ({session_type}) - NO session or No load : {e}")
         return
 
     all_telemetry = []
